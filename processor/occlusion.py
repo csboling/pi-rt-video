@@ -19,5 +19,5 @@ class Occlusion(Processor):
             frame.setflags(write=1)
             self.sprite.draw(frame, pos, t)
 
-            t += 1 / self.framerate
+            t = (t + 1 / self.framerate) % 1.
             yield frame
