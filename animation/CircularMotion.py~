@@ -1,0 +1,10 @@
+from pipeline.animation.Animation import Animation
+
+
+class CircularMotion(Animation):
+
+    def __init__(self, center, radius):
+        self.center = center
+        self.radius = radius
+
+    def get_xy(self, frame, t):

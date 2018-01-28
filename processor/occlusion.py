@@ -1,40 +1,23 @@
-from abc import ABCMeta, abstractmethod
-
 import numpy as np
 
+from pipeline.animation.Animation import Animation
+from pipeline.sprite.Sprite import Sprite
 from pipeline.processor.Processor import Processor
-
-
-class Sprite(metaclass=ABCMeta):
-
-    @abstractmethod
-    def draw_scaled(self, frame, pos, dims, t):
-        pass
 
 
 class Occlusion(Processor):
 
-    def __init__(self, sprite: Sprite, pos, dims):
+    def __init__(self, sprite: Sprite, animation: Animation):
         self.sprite = sprite
-        self.pos = pos
-        self.dims = dims
+        self.animation = animation
 
     def iterate(self):
         t = 0
         for frame in self.source:
+            pos = self.animation.get_xy(frame, t)
+
             frame.setflags(write=1)
-            self.sprite.draw_scaled(frame, self.pos, self.dims, t)
+            self.sprite.draw(frame, pos, t)
+
             t += 1 / self.framerate
             yield frame
-
-
-class RandomSquare(Sprite):
-
-    def draw_scaled(self, frame, pos, dims, t):
-        x, y = pos
-        w, h = dims
-
-        frame[
-            int(y):int(y)+h,
-            int(x):int(x)+w,
-        ] = np.random.randint(0, 255, size=(h, w, 3))

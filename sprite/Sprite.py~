@@ -1,0 +1,5 @@
+class Sprite(metaclass=ABCMeta):
+
+    @abstractmethod
+    def draw_scaled(self, frame, pos, dims, t):
+        pass
