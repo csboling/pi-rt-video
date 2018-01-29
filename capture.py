@@ -12,6 +12,11 @@ class VideoSource:
         print(self.camera.zoom)
         self.raw_capture = PiRGBArray(self.camera, size=resolution)
         time.sleep(0.1)
+        self.source = self.camera.capture_continuous(
+            self.raw_capture,
+            format='bgr',
+            use_video_port=True
+        )
 
     @property
     def resolution(self):
@@ -21,14 +26,6 @@ class VideoSource:
     def framerate(self):
         return self.camera.framerate
 
-    @property
-    def source(self):
-        return self.camera.capture_continuous(
-            self.raw_capture,
-            format='bgr',
-            use_video_port=True
-        )
-
     def __iter__(self):
         return self.iterate()
 
@@ -36,3 +33,4 @@ class VideoSource:
         for frame in self.source:
             yield frame.array
             self.raw_capture.truncate(0)
+            self.raw_capture.seek(0)
