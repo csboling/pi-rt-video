@@ -8,6 +8,10 @@ class Processor(metaclass=ABCMeta):
         return self
 
     @property
+    def resolution(self):
+        return self.source.resolution
+
+    @property
     def framerate(self):
         return self.source.framerate
 

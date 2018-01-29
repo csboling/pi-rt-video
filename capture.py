@@ -8,10 +8,18 @@ class VideoSource:
     def __init__(self, resolution=(640, 480)):
         self.camera = PiCamera()
         self.camera.resolution = resolution
-        self.framerate = self.camera.framerate = 30
+        self.camera.framerate = 30
         print(self.camera.zoom)
         self.raw_capture = PiRGBArray(self.camera, size=resolution)
         time.sleep(0.1)
+
+    @property
+    def resolution(self):
+        return self.camera.resolution
+
+    @property
+    def framerate(self):
+        return self.camera.framerate
 
     @property
     def source(self):
