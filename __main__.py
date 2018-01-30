@@ -20,7 +20,8 @@ from pipeline.processor import (
     RandomPure,
     SliceCombine,
 
-    RandomPureTiler
+    RandomPureTiler,
+    Reverb,
 )
 from pipeline.sprite import RandomSquare
 
@@ -29,11 +30,13 @@ sink = PlaybackSink(
     pipeline=[
         VideoSource((640, 480)),
         RandomPureTiler([
+            IdentityMosh(),
             ReverseMosh(),
-            Repack(4, '>{}f', '<{}i'),
+            # Repack(4, '>{}f', '<{}i'),
             RandomColorspace(),
             Wordpadify(),
         ]),
+        Reverb(),
     ],
 )
 sink.consume()

@@ -17,6 +17,7 @@ from pipeline.processor.pure import (
     RandomPure,
     SliceCombine,
 )
+from pipeline.processor.reverb import Reverb
 from pipeline.processor.tiler import (
     Tiler,
     RandomPureTiler,
@@ -41,6 +42,8 @@ __all__ = [
     PureFunction,
     RandomPure,
     SliceCombine,
+
+    Reverb,
 
     Tiler,
     RandomPureTiler,

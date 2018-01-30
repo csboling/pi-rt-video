@@ -30,6 +30,12 @@ class RandomPureTiler(Tiler):
     def __init__(self, pures):
         self.pures = pures
 
+    def attach(self, upstream):
+        super().attach(upstream)
+        for pure in self.pures:
+            pure.attach(self)
+        return self
+
     def get_rects(self, h, w):
         y = 0
 
