@@ -19,6 +19,8 @@ from pipeline.processor import (
     Lift,
     RandomPure,
     SliceCombine,
+
+    RandomPureTiler
 )
 from pipeline.sprite import RandomSquare
 
@@ -26,11 +28,12 @@ from pipeline.sprite import RandomSquare
 sink = PlaybackSink(
     pipeline=[
         VideoSource((640, 480)),
-        Lift(cv2.erode, kernel=np.ones((5, 5)), iterations=1),
-        # MangleBytes(moshers),
-        # SliceCombine([])
-        # RandomColorspace(),
-        # RandomPure([]),
+        RandomPureTiler([
+            ReverseMosh(),
+            Repack(4, '>{}f', '<{}i'),
+            RandomColorspace(),
+            Wordpadify(),
+        ]),
     ],
 )
 sink.consume()

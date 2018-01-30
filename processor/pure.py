@@ -24,7 +24,10 @@ class Lift(PureFunction):
         self.kwargs = kwargs
 
     def __call__(self, frame):
-        return self.func(frame, *self.args, **self.kwargs)
+        return self.func(
+            frame,
+            *self.args, **self.kwargs
+        )
 
 
 class RandomPure(PureFunction):

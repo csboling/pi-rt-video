@@ -28,6 +28,7 @@ class PlaybackSink:
         for frame in self.source:
             if self.save is not None:
                 out.write(frame)
+
             cv2.imshow('frame', frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break

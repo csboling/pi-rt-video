@@ -31,12 +31,12 @@ class Repack(Mosher):
 
     def mosh(self, raw):
         chunks, remainder = divmod(len(raw), self.chunksize)
+        if remainder:
+            raw += raw[:self.chunksize - remainder]
+            chunks += 1
         yield struct.pack(
-            self.packstr.format(chunks + 1),
-            *struct.unpack(
-                self.unpackstr.format(chunks + 1),
-                raw + raw[:self.chunksize - remainder]
-            )
+            self.packstr.format(chunks),
+            *struct.unpack(self.unpackstr.format(chunks), raw)
         )
 
 

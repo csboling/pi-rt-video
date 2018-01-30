@@ -17,6 +17,10 @@ from pipeline.processor.pure import (
     RandomPure,
     SliceCombine,
 )
+from pipeline.processor.tiler import (
+    Tiler,
+    RandomPureTiler,
+)
 
 
 __all__ = [
@@ -37,4 +41,7 @@ __all__ = [
     PureFunction,
     RandomPure,
     SliceCombine,
+
+    Tiler,
+    RandomPureTiler,
 ]
