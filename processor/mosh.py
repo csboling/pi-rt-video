@@ -22,7 +22,7 @@ class Wordpadify(Mosher):
         yield raw.replace(b'\x0b', b'\x0d0a')
 
 
-class ByteSwap(Mosher):
+class Repack(Mosher):
 
     def __init__(self, chunksize=4, packstr='<{}f', unpackstr='>{}i'):
         self.chunksize = chunksize

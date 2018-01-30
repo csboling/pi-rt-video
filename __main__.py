@@ -9,31 +9,28 @@ from pipeline.processor import (
 
     ChangeColorspace,
     RandomColorspace,
-    ByteSwap,
+
+    Repack,
+    MangleBytes,
+    IdentityMosh,
+    ReverseMosh,
     Wordpadify,
+
+    Lift,
     RandomPure,
     SliceCombine,
 )
 from pipeline.sprite import RandomSquare
 
 
-processors = [
-    ByteSwap(4, '>{}f', '>{}i'),
-    ByteSwap(4, '<{}f', '>{}i'),
-    ByteSwap(8, '<{}d', '>{}Q'),
-    Wordpadify(),
-    *RandomColorspace.functions(),
-]
-
 sink = PlaybackSink(
     pipeline=[
         VideoSource((640, 480)),
-        SliceCombine([
-            RandomPure(processors),
-            RandomPure(processors),
-            RandomPure(processors),
-            RandomPure(processors),
-        ]),
+        Lift(cv2.erode, kernel=np.ones((5, 5)), iterations=1),
+        # MangleBytes(moshers),
+        # SliceCombine([])
+        # RandomColorspace(),
+        # RandomPure([]),
     ],
 )
 sink.consume()

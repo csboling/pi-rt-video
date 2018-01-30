@@ -17,6 +17,16 @@ class PureFunction(Processor):
             yield self(frame)
 
 
+class Lift(PureFunction):
+    def __init__(self, func, *args, **kwargs):
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+
+    def __call__(self, frame):
+        return self.func(frame, *self.args, **self.kwargs)
+
+
 class RandomPure(PureFunction):
 
     def __init__(self, pure_funcs: [PureFunction], hold=3):

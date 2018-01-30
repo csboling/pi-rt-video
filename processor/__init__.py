@@ -4,7 +4,7 @@ from pipeline.processor.color import (
     RandomColorspace,
 )
 from pipeline.processor.mosh import (
-    ByteSwap,
+    Repack,
     IdentityMosh,
     MangleBytes,
     ReverseMosh,
@@ -12,6 +12,7 @@ from pipeline.processor.mosh import (
 )
 from pipeline.processor.occlusion import Occlusion
 from pipeline.processor.pure import (
+    Lift,
     PureFunction,
     RandomPure,
     SliceCombine,
@@ -27,11 +28,12 @@ __all__ = [
     Occlusion,
 
     Wordpadify,
-    ByteSwap,
+    Repack,
     MangleBytes,
     IdentityMosh,
     ReverseMosh,
 
+    Lift,
     PureFunction,
     RandomPure,
     SliceCombine,
