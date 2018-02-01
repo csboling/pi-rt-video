@@ -16,7 +16,7 @@ class Occlusion(Processor):
         for frame in self.source:
             pos = self.animation.get_xy(frame, t)
 
-            frame.setflags(write=1)
+            # frame.setflags(write=1)
             self.sprite.draw(frame, pos, t)
 
             t = (t + 1 / self.framerate) % 1.

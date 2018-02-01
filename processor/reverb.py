@@ -8,7 +8,7 @@ from pipeline.processor.pure import PureFunction
 
 
 class Reverb(PureFunction):
-    def __init__(self, depth=10, decay=0.5):
+    def __init__(self, depth=10, decay=0.4):
         self.memory = deque([0]*depth, depth)
         self.decay = decay
 

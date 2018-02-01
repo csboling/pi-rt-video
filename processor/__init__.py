@@ -7,7 +7,7 @@ from pipeline.processor.mosh import (
     Repack,
     IdentityMosh,
     MangleBytes,
-    ReverseMosh,
+    ReverseBytes,
     Wordpadify,
 )
 from pipeline.processor.occlusion import Occlusion
@@ -36,7 +36,7 @@ __all__ = [
     Repack,
     MangleBytes,
     IdentityMosh,
-    ReverseMosh,
+    ReverseBytes,
 
     Lift,
     PureFunction,

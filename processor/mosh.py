@@ -11,7 +11,7 @@ class IdentityMosh(Mosher):
         yield raw
 
 
-class ReverseMosh(Mosher):
+class ReverseBytes(Mosher):
     def mosh(self, raw):
         yield raw[::-1]
 

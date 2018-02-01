@@ -5,10 +5,10 @@ from picamera import PiCamera
 
 
 class VideoSource:
-    def __init__(self, resolution=(640, 480)):
+    def __init__(self, resolution=(640, 480), framerate=30):
         self.camera = PiCamera()
         self.camera.resolution = resolution
-        self.camera.framerate = 30
+        self.camera.framerate = framerate
         print(self.camera.zoom)
         self.raw_capture = PiRGBArray(self.camera, size=resolution)
         time.sleep(0.1)
