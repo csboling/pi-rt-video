@@ -3,6 +3,7 @@ from pipeline.Pipeline import Pipeline
 from pipeline.playback import PlaybackSink
 from pipeline.processor import (
     RandomColorspace,
+    RandomPureTiler,
     Repack,
     Reverb,
     ReverseBytes,

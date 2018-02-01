@@ -6,7 +6,16 @@ from pygame.time import Clock
 from pipeline.animation import CircularMotion
 from pipeline.Pipeline import Pipeline
 from pipeline.playback import PlaybackSink
-from pipeline.processor import Occlusion, PureFunction, Reverb
+from pipeline.processor import (
+    RandomColorspace,
+    RandomPureTiler,
+    Repack,
+    Reverb,
+    ReverseBytes,
+    Wordpadify,
+    Occlusion,
+    PureFunction,
+)
 from pipeline.sprite import Sprite
 
 
@@ -64,6 +73,13 @@ class VideoSynthesisPipeline(Pipeline):
                 CircularMotion((320, 240), 50)
             ),
             SurfarrayAdapter(),
+            RandomPureTiler([
+                ReverseBytes(),
+                Repack(4, '>{}f', '<{}i'),
+                Repack(4, '<{}f', '<{}i'),
+                RandomColorspace(),
+                Wordpadify(),
+            ]),
             Reverb(),
         ])
 
