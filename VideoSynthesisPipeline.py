@@ -1,3 +1,5 @@
+import numpy as np
+
 from pipeline.Pipeline import Pipeline
 from pipeline.animation import CircularMotion
 from pipeline.playback import PlaybackSink
@@ -8,6 +10,7 @@ from pipeline.processor import (
 from pipeline.processor.synthesis.source import VideoSynthesisSource
 from pipeline.processor.synthesis.draw import Fill, Circle
 from pipeline.processor.synthesis.adapters import SurfarrayAdapter
+from pipeline.animation.parametric import Lissajous
 
 
 class VideoSynthesisPipeline(Pipeline):
@@ -18,11 +21,11 @@ class VideoSynthesisPipeline(Pipeline):
             source,
             Fill((0, 0, 0)),
             Occlusion(
-                Circle(10, (0, 255, 0)),
-                CircularMotion((w // 2, h // 2), 50)
+                Circle(10, (0, 255, 0)),  
+                Lissajous(100, 100, a=5, b=4, v=0.25),
             ),
             SurfarrayAdapter(),
-            Reverb(),
+            Reverb(decay=1.0),
         ])
 
     def run(self):

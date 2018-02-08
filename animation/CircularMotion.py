@@ -10,7 +10,7 @@ class CircularMotion(Animation):
         self.radius = radius
         self.velocity = velocity
 
-    def get_xy(self, frame, t):
+    def get_xy(self, res, frame, t):
         return (
             self.center[0] +
             self.radius * np.cos(

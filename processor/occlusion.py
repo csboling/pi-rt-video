@@ -14,10 +14,9 @@ class Occlusion(Processor):
     def iterate(self):
         t = 0
         for frame in self.source:
-            pos = self.animation.get_xy(frame, t)
+            pos = self.animation.get_xy(self.resolution, frame, t)
 
-            # frame.setflags(write=1)
             self.sprite.draw(frame, pos, t)
 
-            t = (t + 1 / self.framerate) % 1.
+            t = (t + 1 / self.framerate)
             yield frame
