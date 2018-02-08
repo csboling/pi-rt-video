@@ -41,8 +41,8 @@ class RandomPureTiler(Tiler):
 
         while y < h:
             x = 0
-            x_stride = random.randint(8, 256)
-            y_stride = random.randint(8, 256)
+            x_stride = random.randint(8, w // 4)
+            y_stride = random.randint(8, h // 4)
             while x < w:
                 yield (
                     (y, x),

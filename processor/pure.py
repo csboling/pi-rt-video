@@ -17,6 +17,11 @@ class PureFunction(Processor):
             yield self(frame)
 
 
+class Identity(PureFunction):
+    def __call__(self, frame):
+        return frame
+            
+
 class Lift(PureFunction):
     def __init__(self, func, *args, **kwargs):
         self.func = func

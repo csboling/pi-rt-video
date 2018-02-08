@@ -1,4 +1,8 @@
+# from pipeline.VideoProcessingPipeline import VideoProcessingPipeline
 from pipeline.VideoSynthesisPipeline import VideoSynthesisPipeline
 
 
-VideoSynthesisPipeline().run()
+# p = VideoProcessingPipeline()
+p = VideoSynthesisPipeline()
+
+p.run()

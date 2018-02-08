@@ -1,14 +1,10 @@
 import random
+import re
 import struct
 
 import numpy as np
 
 from pipeline.processor.Mosher import Mosher
-
-
-class IdentityMosh(Mosher):
-    def mosh(self, raw):
-        yield raw
 
 
 class ReverseBytes(Mosher):
@@ -55,3 +51,13 @@ class MangleBytes(Mosher):
 
     def mangle(self, chunk):
         return next(random.choice(self.moshers).mosh(chunk))
+
+
+class Replace(Mosher):
+
+    def __init__(self, pattern, substitution):
+        self.pattern = pattern
+        self.substitution = substitution
+
+    def mosh(self, raw):
+        yield re.sub(self.pattern, self.substitution, raw)

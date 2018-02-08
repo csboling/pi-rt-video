@@ -1,27 +1,32 @@
 import numpy as np
-from pygame import Surface
-from pygame import draw, surfarray
+import pygame
+from pygame import (
+    display,
+    draw,
+    surfarray,
+)
 from pygame.time import Clock
 
 from pipeline.animation import CircularMotion
 from pipeline.Pipeline import Pipeline
 from pipeline.playback import PlaybackSink
 from pipeline.processor import (
-    RandomColorspace,
-    RandomPureTiler,
-    Repack,
-    Reverb,
-    ReverseBytes,
-    Wordpadify,
     Occlusion,
     PureFunction,
+    Reverb,
 )
 from pipeline.sprite import Sprite
 
 
 class VideoSynthesisSource:
-    def __init__(self, resolution=(640, 480), framerate=30):
-        self.surface = Surface(resolution)
+
+    def __init__(self, resolution=None, framerate=30):
+        if resolution is None:
+            pygame.init()
+            info = display.Info()
+            resolution = (info.current_w, info.current_h)
+
+        self.surface = pygame.Surface(resolution)
         self.framerate = framerate
         self.clock = Clock()
 
@@ -65,21 +70,16 @@ class PygameCircle(Sprite):
 
 class VideoSynthesisPipeline(Pipeline):
     def __init__(self):
+        source = VideoSynthesisSource()
+        w, h = source.resolution
         super().__init__([
-            VideoSynthesisSource(),
+            source,
             Fill((0, 0, 0)),
             Occlusion(
                 PygameCircle(10, (0, 255, 0)),
-                CircularMotion((320, 240), 50)
+                CircularMotion((w // 2, h // 2), 50)
             ),
             SurfarrayAdapter(),
-            RandomPureTiler([
-                ReverseBytes(),
-                Repack(4, '>{}f', '<{}i'),
-                Repack(4, '<{}f', '<{}i'),
-                RandomColorspace(),
-                Wordpadify(),
-            ]),
             Reverb(),
         ])
 

@@ -5,13 +5,13 @@ from pipeline.processor.color import (
 )
 from pipeline.processor.mosh import (
     Repack,
-    IdentityMosh,
     MangleBytes,
     ReverseBytes,
-    Wordpadify,
+    Replace,
 )
 from pipeline.processor.occlusion import Occlusion
 from pipeline.processor.pure import (
+    Identity,
     Lift,
     PureFunction,
     RandomPure,
@@ -26,16 +26,16 @@ from pipeline.processor.tiler import (
 
 __all__ = [
     Processor,
-
+    Identity,
+    
     ChangeColorspace,
     RandomColorspace,
 
     Occlusion,
 
-    Wordpadify,
     Repack,
+    Replace,
     MangleBytes,
-    IdentityMosh,
     ReverseBytes,
 
     Lift,
