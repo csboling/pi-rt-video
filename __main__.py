@@ -1,4 +1,4 @@
-# from pipeline.VideoProcessingPipeline import VideoProcessingPipeline
+from pipeline.VideoProcessingPipeline import VideoProcessingPipeline
 from pipeline.VideoSynthesisPipeline import VideoSynthesisPipeline
 
 

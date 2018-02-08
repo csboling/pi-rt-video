@@ -22,7 +22,7 @@ class VideoProcessingPipeline(Pipeline):
     
     def __init__(self):
         super().__init__([
-            VideoSource((640, 480)),
+            VideoSource((656, 416)),
             Lift(
                 cv2.resize,
                 (0, 0), fx=1/self.downsampling, fy=1/self.downsampling,
