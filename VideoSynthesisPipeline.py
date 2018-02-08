@@ -11,6 +11,7 @@ from pipeline.processor.synthesis.source import VideoSynthesisSource
 from pipeline.processor.synthesis.draw import Fill, Circle
 from pipeline.processor.synthesis.adapters import SurfarrayAdapter
 from pipeline.animation.parametric import Lissajous
+from pipeline.sprite.RandomSquare import RandomSquare
 
 
 class VideoSynthesisPipeline(Pipeline):
@@ -20,11 +21,12 @@ class VideoSynthesisPipeline(Pipeline):
         super().__init__([
             source,
             Fill((0, 0, 0)),
+            SurfarrayAdapter(),
             Occlusion(
-                Circle(10, (0, 255, 0)),  
+                RandomSquare((15, 15)),
+                # Circle(10, (0, 255, 0)),  
                 Lissajous(100, 100, a=5, b=4, v=0.25),
             ),
-            SurfarrayAdapter(),
             Reverb(decay=1.0),
         ])
 
