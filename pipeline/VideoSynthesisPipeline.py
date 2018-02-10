@@ -27,20 +27,21 @@ from pipeline.sprite.shape import Square
 
 class VideoSynthesisPipeline(Pipeline):
     def __init__(self):
-        source = VideoSynthesisSource()
+        source = VideoSynthesisSource(framerate=60, fill=(100, 100, 100))
         w, h = source.resolution
         super().__init__([
             source,
             Pen(
-                Harmonograph(
-                    [[100, 2, 1, 0.05], [100, 3, 1, 0.05]],
-                    [[100, 3, 1, 0.05], [100, 1, 1, 0.05]],
-
-                    v=0.05
-                ),
-                lambda pos, w, h, t: (
-                    0, 255, 0,
-                ),
+                LissajousCurve(100, 100, 3, 2),
+                [
+                    (148,   0, 211),
+                    ( 75,   0, 130),
+                    (  0,   0, 255),
+                    (  0, 255,   0),
+                    (255, 255,   0),
+                    (255, 127,   0),
+                    (255,   0,   0),
+                ],
             ),
             SurfarrayAdapter(),
         ])

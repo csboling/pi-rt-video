@@ -1,3 +1,7 @@
+from collections import Iterable
+import itertools
+
+import numpy as np
 import pygame
 
 from pipeline.processor.Processor import Processor
@@ -14,10 +18,19 @@ class Fill(PureFunction):
         return surface
 
 
+def parse_color(color, gradient_points):
+    if callable(color):
+        return color
+    if isinstance(color, Iterable):
+        grad = Gradient(color, gradient_points)
+        it = iter(grad)
+        c = next(it)
+        return lambda *args: next(it)
+
 class Pen(Processor):
     def __init__(self, animation, color):
         self.animation = animation
-        self.color = color
+        self.color = parse_color(color, 20)
 
     def iterate(self):
         t = 0
@@ -36,7 +49,7 @@ class Pen(Processor):
 class Circle(Sprite):
     def __init__(self, radius, color):
         self.radius = radius
-        self.color = color
+        self.color = parse_color(color)
 
     def draw(self, surface: pygame.Surface, pos, t):
         x, y = pos
@@ -47,3 +60,23 @@ class Circle(Sprite):
         )
 
 
+class Gradient:
+    def __init__(self, colors, points):
+        self.colors = colors
+        self.points = points
+
+    def __iter__(self):
+        return self.iterate()
+
+    def iterate(self):
+        it = itertools.cycle(self.colors)
+        prev = None
+        while True:
+            curr = next(it)
+            if prev is not None:
+                gradient = np.vstack(
+                    np.linspace(p, c, self.points) 
+                    for p, c in zip(prev, curr)
+                ).T
+                yield from iter(gradient)
+            prev = curr

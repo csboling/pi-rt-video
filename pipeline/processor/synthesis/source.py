@@ -9,7 +9,7 @@ from pygame.time import Clock
 
 class VideoSynthesisSource:
 
-    def __init__(self, resolution=None, framerate=30):
+    def __init__(self, resolution=None, framerate=30, fill=(0, 0, 0)):
         if resolution is None:
             pygame.init()
             info = display.Info()
@@ -17,6 +17,7 @@ class VideoSynthesisSource:
             print('detected resolution: {} x {}'.format(*resolution))
 
         self.surface = pygame.Surface(resolution)
+        self.surface.fill(fill)
         self.framerate = framerate
         self.clock = Clock()
 

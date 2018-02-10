@@ -34,13 +34,13 @@ class Parametric2DMotion(Animation):
 class Harmonograph(Parametric2DMotion):
     def __init__(self, x_terms, y_terms, *args, **kwargs):
         super().__init__(
-            lambda t: self.term(*x_terms[0], t) + self.term(*x_terms[1], t),
-            lambda t: self.term(*y_terms[0], t) + self.term(*y_terms[1], t),
+            lambda t: sum(self.term(np.cos, *params, t) for params in x_terms),
+            lambda t: sum(self.term(np.sin, *params, t) for params in x_terms),
             *args, **kwargs
         )
 
-    def term(self, A, f, p, d, t):
-        return A*np.sin(t * f + p)*np.exp(-d*t)
+    def term(self, func, A, f, p, d, t):
+        return A*func(t * f + p)*np.exp(-d*t)
 
 
 class Hypocycloid(Parametric2DMotion):
