@@ -9,7 +9,11 @@ from pipeline.processor import (
 )
 from pipeline.processor.geometry import Rotate
 from pipeline.processor.synthesis.source import VideoSynthesisSource
-from pipeline.processor.synthesis.draw import Fill, Circle
+from pipeline.processor.synthesis.draw import (
+    Circle,
+    Fill,
+    Pen,
+)
 from pipeline.processor.synthesis.adapters import SurfarrayAdapter
 from pipeline.animation.parametric import (
     Harmonograph,
@@ -27,32 +31,18 @@ class VideoSynthesisPipeline(Pipeline):
         w, h = source.resolution
         super().__init__([
             source,
-            Fill((0, 0, 0)),
-            SurfarrayAdapter(),
-            Occlusion(
-                Square(
-                    (3, 3), 
-                    lambda pos, w, h, t: (
-                        128 + 127*np.cos(t), 
-                        128 + 127*np.sin(t),
-                        128 + 127*np.cos(t)*np.sin(t),
-                    )
-                ),
+            Pen(
                 Harmonograph(
-                    [[100, 2, 3, 0.], [100, 7, 5, 0.]],
-                    [[100, 13, 7, 0.], [100, 2, 11, 0.]],
+                    [[100, 2, 1, 0.05], [100, 3, 1, 0.05]],
+                    [[100, 3, 1, 0.05], [100, 1, 1, 0.05]],
+
                     v=0.05
                 ),
-                # Nephroid(25, 25, 2, 3, 3, 5, v=0.1),
+                lambda pos, w, h, t: (
+                    0, 255, 0,
+                ),
             ),
-            Reverb(
-                depth=500, 
-                decay=0.99, 
-                normalize=False,
-            ),
-            Rotate(
-                lambda t: 2*np.pi*t,
-            ),
+            SurfarrayAdapter(),
         ])
 
     def run(self):
