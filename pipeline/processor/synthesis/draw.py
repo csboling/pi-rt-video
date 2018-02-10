@@ -21,16 +21,18 @@ class Fill(PureFunction):
 def parse_color(color, gradient_points):
     if callable(color):
         return color
-    if isinstance(color, Iterable):
+    if isinstance(color, Gradient):
+        grad = color
+    elif isinstance(color, Iterable):
         grad = Gradient(color, gradient_points)
-        it = iter(grad)
-        c = next(it)
-        return lambda *args: next(it)
+    it = iter(grad)
+    c = next(it)
+    return lambda *args: next(it)
 
 class Pen(Processor):
-    def __init__(self, animation, color):
+    def __init__(self, animation, colors, points=20):
         self.animation = animation
-        self.color = parse_color(color, 20)
+        self.color = parse_color(colors, points)
 
     def iterate(self):
         t = 0
@@ -75,8 +77,30 @@ class Gradient:
             curr = next(it)
             if prev is not None:
                 gradient = np.vstack(
-                    np.linspace(p, c, self.points) 
-                    for p, c in zip(prev, curr)
+                    self.interpolate(zip(prev, curr), self.points)
                 ).T
                 yield from iter(gradient)
             prev = curr
+
+    def interpolate(self, values, points):
+        return (
+            np.linspace(begin, end, points)
+            for begin, end in values
+        )
+
+class RandomPointLengthGradient(Gradient):
+    def interpolate(self, values, points):
+        n = np.random.randint(1, points)
+        for begin, end in values:
+            yield np.linspace(begin, end, n)
+
+ROYGBIV = [
+    (148,   0, 211),
+    ( 75,   0, 130),
+    (  0,   0, 255),
+    (  0, 255,   0),
+    (255, 255,   0),
+    (255, 127,   0),
+    (255,   0,   0),
+]
+

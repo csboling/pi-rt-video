@@ -44,14 +44,6 @@ class RandomPure(PureFunction):
     def __call__(self, frame):
         return random.choice(self.pure_funcs)(frame)
 
-    # def iterate(self):
-    #     it = iter(self.source)
-    #     while True:
-    #         func = random.choice(self.pure_funcs)
-    #         hold = random.randint(1, self.hold)
-    #         for _ in range(hold):
-    #             yield func(next(it))
-
 
 class CombinePure(Processor):
     def __init__(self, pure_funcs: [PureFunction]):

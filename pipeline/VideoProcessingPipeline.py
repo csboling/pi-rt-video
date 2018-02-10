@@ -4,16 +4,18 @@ import numpy as np
 from pipeline.capture import VideoSource
 from pipeline.Pipeline import Pipeline
 from pipeline.playback import PlaybackSink
-from pipeline.processor import (
+
+from pipeline.processor.pure import (
     Identity,
     Lift,
-    RandomColorspace,
-    RandomPureTiler,
+)
+from pipeline.processor.color import RandomColorspace
+from pipeline.processor.mosh import (
     Repack,
     Replace,
-    Reverb,
-    ReverseBytes,
 )
+from pipeline.processor.reverb import Reverb
+from pipeline.processor.tiler import RandomPureTiler
 
 
 class VideoProcessingPipeline(Pipeline):
