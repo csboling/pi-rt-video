@@ -5,7 +5,8 @@ import numpy as np
 
 from pipeline.Pipeline import Pipeline
 from pipeline.synthesis.source import VideoSynthesisSource
-from pipeline.playback import PlaybackSink
+from pipeline.playback.opencv import OpenCVSink
+from pipeline.playback.pygame import PygameSink
 
 from pipeline.animation.Animation import NoAnimation
 from pipeline.animation import CircularMotion
@@ -25,12 +26,17 @@ from pipeline.synthesis.draw import (
     Pen,
     ROYGBIV,
 )
-from pipeline.synthesis.pattern import FunkySineThing
+from pipeline.synthesis.pattern import (
+    AnimateMap, 
+    ConstantColorMap, 
+    WeirdSineColorMap,
+)
 from pipeline.sprite.wireframe import (
     Projection2DMesh,
     Rotate3D,
     SphereWireframe,
     SquareWireframe,
+    TextureMap,
 )
 
 
@@ -50,27 +56,34 @@ class VideoSynthesisPipeline(Pipeline):
 
             # SurfarrayAdapter(),
             # Resample(1/self.downsampling),
-            # FunkySineThing(),
+            # AnimateMap(WeirdSineColorMap()),
             # Resample(self.downsampling),
 
             Fill((0, 0, 0)),
             Occlusion(
                 animation=NoAnimation((w / 2, h / 2)),
                 sprite=Projection2DMesh(
-                    reduce(
+            #     sprite=TextureMap(
+                    wireframe=reduce(
                         lambda w, f: f(w),
                         [
                             SphereWireframe(150, points=20),
-                            # SquareWireframe(length=300, points=20),
                             Rotate3D(lambda t: (t, 0, t)),
-                        ]
+                        ],
                     ),
-                    vertex_color=(255, 0, 0),
+                    vertex_color=(0, 0, 255),
                     edge_color=(0, 255, 0)
+            #         texture=WeirdSineColorMap(), # ConstantColorMap(
+            #         #     color=lambda t: (
+            #         #         128 + int(127*np.cos(t)), 
+            #         #         127 + int(127*np.sin(t)), 
+            #         #         0
+            #         #     )
+            #         # ),
                 )
             ),
-            SurfarrayAdapter(),
+            # SurfarrayAdapter(),
         ])
 
     def run(self):
-        super().run(PlaybackSink)
+        super().run(PygameSink)

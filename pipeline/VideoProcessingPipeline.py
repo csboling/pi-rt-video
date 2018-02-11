@@ -3,7 +3,7 @@ import numpy as np
 
 from pipeline.capture import VideoSource
 from pipeline.Pipeline import Pipeline
-from pipeline.playback import PlaybackSink
+from pipeline.playback.opencv import OpenCVSink
 
 from pipeline.processor.pure import (
     Identity,
@@ -47,7 +47,7 @@ class VideoProcessingPipeline(Pipeline):
     def run(self):
         super().run(
             lambda *args, **kwargs:
-            PlaybackSink(
+            OpenCVSink(
                 *args, **kwargs,
                 save='downsample{}x.avi'.format(self.downsampling)
             )

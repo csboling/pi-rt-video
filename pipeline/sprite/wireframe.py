@@ -27,6 +27,7 @@ class Projection2DMesh(Sprite):
     def draw(self, surface, pos, t):
         center = np.array(pos)
         vertices, edges = self.wireframe.mesh(t)
+
         if self.edge_color is not ():
             for edge in edges:
                 pygame.draw.aaline(
@@ -35,12 +36,45 @@ class Projection2DMesh(Sprite):
                     (edge[1, :2] + center).astype(int)
                 )
         if self.vertex_color is not ():
-            for vertex in vertices:
+            for vertex in vertices.reshape((3, -1)).T:
                 pygame.draw.circle(
                     surface, self.vertex_color,
                     (vertex[:2] + center).astype(int),
                     3
                 )
+
+
+class TextureMap(Sprite):
+    def __init__(self, wireframe, texture):
+        self.wireframe = wireframe
+        self.texture = texture
+
+    def draw(self, frame, pos, t):
+        center = np.array(pos)
+        vertices, edges = self.wireframe.mesh(t)
+
+        w, h = vertices.shape[1:]
+        texture = self.texture((w, h), t)
+        u, v = self.wireframe.uv_map()
+        uv_coords = np.stack(((w-1)*u, (h-1)*v)).astype(int)
+        mapped = texture[
+            uv_coords[1, ...], 
+            uv_coords[0, ...],
+            :
+        ]
+        positions = (
+            center + vertices[:2, ...].transpose(1, 2, 0)
+        ).astype(int)
+        bounds = np.stack((
+            positions[1:, 1:, :],
+            positions[:-1, :-1, :],
+        ), axis=-1)
+        for i in range(w-1):
+            for j in range(h-1):
+                xs, ys = bounds[j, i, :, :]
+                x_start, x_stop = xs
+                y_start, y_stop = ys
+                frame[y_start:y_stop, x_start:x_stop, :] = mapped[j, i, :]
     
 
 class SquareWireframe(Wireframe):
@@ -80,7 +114,7 @@ class SphereWireframe(Wireframe):
         ))
 
     def mesh(self, t):
-        vertices = self.points.reshape((3, -1)).T
+        vertices = self.points
         edges = np.concatenate((
             self.adj_to_edges(
                 self.points[:, :-1, :],
@@ -92,7 +126,14 @@ class SphereWireframe(Wireframe):
             ),
         ))
 
-        return (vertices, edges)    
+        return (vertices, edges)
+
+    def uv_map(self):
+        d = self.points / np.linalg.norm(self.points, axis=0)
+        return np.stack((
+            0.5 + np.arctan2(d[0, ...], d[2, ...]) / (2 * np.pi),
+            0.5 + d[1] * 0.5,
+        ))
 
 
 class WireframeProcessor(Wireframe):
@@ -102,6 +143,9 @@ class WireframeProcessor(Wireframe):
 
     def mesh(self, t):
         return self.apply(self.wireframe, t)
+
+    def uv_map(self):
+        return self.wireframe.uv_map()
 
 
 class Rotate3D(WireframeProcessor):
@@ -122,7 +166,7 @@ class Rotate3D(WireframeProcessor):
         ).dot(
             cls.rotate_x(alpha)
         )
-        rotated_vertices = np.einsum('ij,kj->ki', R, vertices)
+        rotated_vertices = np.einsum('ij,jkl->ikl', R, vertices)
         rotated_edges = np.einsum('ij,klj->kli', R, edges)
         return (rotated_vertices, rotated_edges)
             
