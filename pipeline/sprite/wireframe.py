@@ -1,76 +1,106 @@
+from abc import ABCMeta, abstractmethod
+
 import numpy as np
 import pygame
 
 from pipeline.sprite.Sprite import Sprite
 
 
-class Wireframe(Sprite):
-    def __init__(self, vertex_color, edge_color):
-        self.vertex_color = vertex_color
-        self.edge_color = edge_color
+class Wireframe(metaclass=ABCMeta):
 
     @staticmethod
     def adj_to_edges(left, right):
         return np.stack((left, right)).reshape(2, 3, -1).transpose((2, 0, 1))
 
+    @abstractmethod
+    def mesh(self):
+        pass
+
+
+
+class Projection2DMesh(Sprite):
+    def __init__(self, wireframe, vertex_color, edge_color):
+        self.wireframe = wireframe
+        self.vertex_color = vertex_color
+        self.edge_color = edge_color
+
     def draw(self, surface, pos, t):
         center = np.array(pos)
-        vertices, edges = self.render(t)
-        for edge in edges:
-            pygame.draw.aaline(
-                surface, self.edge_color, 
-                (edge[0, :2] + center).astype(int),
-                (edge[1, :2] + center).astype(int)
-            )
-        for vertex in vertices:
-            pygame.draw.circle(
-                surface, self.vertex_color,
-                (vertex[:2] + center).astype(int),
-                3
-            )
-
-
-class ConstantWireframe(Wireframe):
+        vertices, edges = self.wireframe.mesh(t)
+        if self.edge_color is not ():
+            for edge in edges:
+                pygame.draw.aaline(
+                    surface, self.edge_color, 
+                    (edge[0, :2] + center).astype(int),
+                    (edge[1, :2] + center).astype(int)
+                )
+        if self.vertex_color is not ():
+            for vertex in vertices:
+                pygame.draw.circle(
+                    surface, self.vertex_color,
+                    (vertex[:2] + center).astype(int),
+                    3
+                )
     
-    def render(self, t):
-        return self.vertices, self.edges
 
-
-class SquareWireframe(ConstantWireframe):
+class SquareWireframe(Wireframe):
     def __init__(self, length, points, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         xs, ys = np.meshgrid(
             np.linspace(-length / 2, length / 2, points),
             np.linspace(-length / 2, length / 2, points)
         )
-        grid_vertices = np.stack((xs, ys, np.zeros(xs.shape)))
-        self.vertices = grid_vertices.reshape(3, -1).T
-        self.edges = np.concatenate((
+        self.points = np.stack((xs, ys, np.zeros(xs.shape)))
+
+    def mesh(self, t):
+        vertices = self.points.reshape(3, -1).T
+        edges = np.concatenate((
             self.adj_to_edges(
-                grid_vertices[:, :-1, :], 
-                grid_vertices[:, 1:, :]
+                self.points[:, :-1, :], 
+                self.points[:, 1:, :]
             ),
             self.adj_to_edges(
-                grid_vertices[:, :, :-1], 
-                grid_vertices[:, :, 1:]
+                self.points[:, :, :-1], 
+                self.points[:, :, 1:]
             )
         ))
+
+        return (vertices, edges)
         
+
+class SphereWireframe(Wireframe):
+    def __init__(self, r, points):
+        theta, phi = np.meshgrid(
+            np.linspace(-np.pi, np.pi, points),
+            np.linspace(-np.pi/2, np.pi/2, points),
+        )
+        self.points = np.stack((
+            r*np.sin(theta)*np.cos(phi),
+            r*np.sin(theta)*np.sin(phi),
+            r*np.cos(theta),
+        ))
+
+    def mesh(self, t):
+        vertices = self.points.reshape((3, -1)).T
+        edges = np.concatenate((
+            self.adj_to_edges(
+                self.points[:, :-1, :],
+                self.points[:, 1:, :],
+            ),
+            self.adj_to_edges(
+                self.points[:, :, :-1],
+                self.points[:, :, 1:],
+            ),
+        ))
+
+        return (vertices, edges)    
+
 
 class WireframeProcessor(Wireframe):
     def __call__(self, wireframe):
         self.wireframe = wireframe 
         return self
 
-    @property
-    def vertex_color(self):
-        return self.wireframe.vertex_color
-
-    @property
-    def edge_color(self):
-        return self.wireframe.edge_color
-
-    def render(self, t):
+    def mesh(self, t):
         return self.apply(self.wireframe, t)
 
 
@@ -80,7 +110,7 @@ class Rotate3D(WireframeProcessor):
         self.func = func
         
     def apply(self, w, t):
-        vertices, edges = w.render(t)
+        vertices, edges = w.mesh(t)
         angle = self.func(t)
         return self.rotate(vertices, edges, angle)
 
@@ -119,4 +149,3 @@ class Rotate3D(WireframeProcessor):
             [np.sin(theta), np.cos(theta), 0],
             [0, 0, 1],
         ])
-

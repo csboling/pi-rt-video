@@ -12,12 +12,6 @@ class ReverseBytes(Mosher):
         yield raw[::-1]
 
 
-class Wordpadify(Mosher):
-
-    def mosh(self, raw):
-        yield raw.replace(b'\x0b', b'\x0d0a')
-
-
 class Repack(Mosher):
 
     def __init__(self, chunksize=4, packstr='<{}f', unpackstr='>{}i'):

@@ -1,6 +1,7 @@
 from abc import abstractmethod
 import random
 
+import cv2
 import numpy as np
 
 from pipeline.processor.Processor import Processor
@@ -34,6 +35,12 @@ class Lift(PureFunction):
             *self.args, **self.kwargs
         )
 
+class Set(PureFunction):
+    def __init__(self, value):
+        self.value = value
+    
+    def __call__(self, frame):
+        return self.value
 
 class RandomPure(PureFunction):
 
@@ -73,3 +80,17 @@ class SliceCombine(CombinePure):
                 int(ix*w/len(frames)):int((ix + 1)*w/len(frames)),
             ]
         return ret
+
+
+class Resample(PureFunction):
+    def __init__(self, factor, mode=cv2.INTER_LINEAR):
+        self.factor = factor
+        self.mode = mode
+
+    @property
+    def resolution(self):
+        w, h = self.source.resolution
+        return (int(w*self.factor), int(h*self.factor))
+
+    def __call__(self, frame):
+        return cv2.resize(frame, (0, 0), fx=self.factor, fy=self.factor)
