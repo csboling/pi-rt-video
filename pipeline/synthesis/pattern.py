@@ -42,9 +42,21 @@ class ConstantColorMap(AnimatedColorMap):
 class WeirdSineColorMap(AnimatedColorMap):
     def __init__(self):
         super().__init__( 
-            r=lambda x, y, t: np.sin(t*np.outer(x,y)*y),
-            g=lambda x, y, t: np.cos(t*y)*np.cos(np.outer(x,y)),
-            b=lambda x, y, t: np.cos(t*np.outer(x,y)+np.pi)
+            r=lambda x, y, t: np.sin(
+                np.exp(1.5*np.sin(t))
+                *
+                np.outer(x,y)*y
+            ),
+            g=lambda x, y, t: np.cos(
+                np.exp(1.5*np.cos(t))*y
+            )*np.cos(np.outer(x,y)),
+            b=lambda x, y, t: np.cos(
+                np.exp(1.5*np.cos(t)*np.sin(t))
+                *
+                np.outer(x,y)
+                +
+                np.pi
+            )
         )
 
 
@@ -60,12 +72,3 @@ class AnimateMap(Processor):
             yield self.color_map((w, h), t)
             t += 1 / self.framerate
 
-# class FunkySineThing(AnimatedColorMap):
-#     def __init__(self):
-#         super().__init__(
-#             ColorMap(
-#                 r=lambda x, y, t: np.sin(t*np.outer(x,y)*y),
-#                 g=lambda x, y, t: np.cos(t*y)*np.cos(np.outer(x,y)),
-#                 b=lambda x, y, t: np.cos(t*np.outer(x,y)+np.pi)
-#             )
-#         )
