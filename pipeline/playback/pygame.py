@@ -29,5 +29,5 @@ class PygameSink(Sink):
 
     def initialize(self, res, flags=0):
         pygame.init()
-        screen = pygame.display.set_mode(res, flags | pygame.FULLSCREEN)
+        screen = pygame.display.set_mode(res, flags) # | pygame.FULLSCREEN)
 

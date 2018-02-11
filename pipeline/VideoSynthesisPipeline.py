@@ -36,7 +36,7 @@ from pipeline.synthesis.draw import (
 )
 from pipeline.synthesis.pattern import (
     AnimateMap, 
-    ConstantColorMap, 
+    UniformColorMap,
     WeirdSineColorMap,
 )
 from pipeline.sprite.wireframe import (

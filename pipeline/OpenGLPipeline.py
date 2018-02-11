@@ -1,12 +1,15 @@
 from pipeline.Pipeline import Pipeline
 
-# from pipeline.opengl import (
-#     # OpenGLRotate,
-#     OpenGLSink,
-#     # OpenGLSphere,
-#     # OpenGLSurfaceSource,
-# )
-
+from pipeline.sprite.wireframe import (
+    SphereWireframe,
+    SquareWireframe,
+)
+from pipeline.synthesis.opengl import (
+    BindTexture,
+    Clear,
+    Rotate,
+)
+from pipeline.synthesis.pattern import UniformColorMap, WeirdSineColorMap
 
 from pipeline.synthesis.source import VideoSynthesisSource
 from pipeline.playback.opengl import OpenGLPygameSink
@@ -15,18 +18,20 @@ from pipeline.playback.opengl import OpenGLPygameSink
 class OpenGLPipeline(Pipeline):
 
     def __init__(self):
-        # source = OpenGLSurfaceSource()
         source = VideoSynthesisSource(
-            framerate=24, fill=(100, 100, 100)
+            framerate=24, resolution=(640, 480)
         )
         w, h = source.resolution
 
         super().__init__([
             source,
          
-            # OpenGLCanvas(),
-            # OpenGLSphere(150, points=20),
-            # OpenGLRotate(lambda t: (t, 0, t)),
+            Clear(),
+            BindTexture(
+                wireframe=SquareWireframe(length=2.),
+                texture=WeirdSineColorMap()
+            ),
+            Rotate(lambda t: (0.5, 0., 0.5)),
         ])
 
     def run(self):

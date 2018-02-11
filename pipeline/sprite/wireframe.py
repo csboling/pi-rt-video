@@ -75,42 +75,79 @@ class TextureMap(Sprite):
                 x_start, x_stop = xs
                 y_start, y_stop = ys
                 frame[y_start:y_stop, x_start:x_stop, :] = mapped[j, i, :]
-    
+
 
 class SquareWireframe(Wireframe):
-    def __init__(self, length, points, *args, **kwargs):
-        xs, ys = np.meshgrid(
-            np.linspace(-length / 2, length / 2, points),
-            np.linspace(-length / 2, length / 2, points)
-        )
-        self.points = np.stack((xs, ys, np.zeros(xs.shape)))
+    def __init__(self, length=1.):
+        self.length = length
+
+        grid = np.array([
+                [
+                    [
+                        -length / 2, -length / 2, 0,
+                        0, 0,
+                    ],
+                    [
+                        -length / 2,  length / 2, 0,
+                        0, 1,
+                    ]
+                ],
+                [
+                    [
+                        length / 2,  length / 2, 0,
+                        1, 1,
+                    ],
+                    [
+                        length / 2, -length / 2, 0,
+                        1, 0,
+                    ],
+                ],
+        ])
+        self.vertices, self.uv, _ = np.dsplit(grid, [3, 5])
 
     def mesh(self, t):
-        vertices = self.points.reshape(3, -1).T
-        edges = np.concatenate((
-            self.adj_to_edges(
-                self.points[:, :-1, :], 
-                self.points[:, 1:, :]
-            ),
-            self.adj_to_edges(
-                self.points[:, :, :-1], 
-                self.points[:, :, 1:]
-            )
-        ))
+        return (self.vertices, None)
 
-        return (vertices, edges)
+    def uv_map(self):
+        return self.uv
         
 
+# class SquareWireframe(Wireframe):
+#     def __init__(self, length, density, *args, **kwargs):
+#         self.length = length
+#         self.density = density
+#         xs, ys = np.meshgrid(
+#             np.linspace(-self.length / 2, self.length / 2, self.density),
+#             np.linspace(-self.length / 2, self.length / 2, self.density)
+#         )
+#         self.points = np.stack((xs, ys, np.zeros(xs.shape)))
+
+#     def mesh(self, t):
+#         vertices = self.points.reshape(3, -1).T
+#         edges = np.concatenate((
+#             self.adj_to_edges(
+#                 self.points[:, :-1, :], 
+#                 self.points[:, 1:, :]
+#             ),
+#             self.adj_to_edges(
+#                 self.points[:, :, :-1], 
+#                 self.points[:, :, 1:]
+#             )
+#         ))
+
+
 class SphereWireframe(Wireframe):
-    def __init__(self, r, points):
+    def __init__(self, r, density):
+        self.radius = r
+        self.density = density
         theta, phi = np.meshgrid(
-            np.linspace(-np.pi, np.pi, points),
-            np.linspace(-np.pi/2, np.pi/2, points),
+            np.linspace(-np.pi, np.pi, self.density),
+            np.linspace(-np.pi/2, np.pi/2, self.density),
         )
         self.points = np.stack((
-            r*np.sin(theta)*np.cos(phi),
-            r*np.sin(theta)*np.sin(phi),
-            r*np.cos(theta),
+            self.radius*np.sin(theta)*np.cos(phi),
+            self.radius*np.sin(theta)*np.sin(phi),
+            self.radius*np.cos(theta),
         ))
 
     def mesh(self, t):

@@ -27,7 +27,7 @@ class AnimatedColorMap:
         )
 
 
-class ConstantColorMap(AnimatedColorMap):
+class UniformColorMap(AnimatedColorMap):
     @params(color=None)
     def __init__(self, color):
         self.color = color

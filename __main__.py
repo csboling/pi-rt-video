@@ -8,5 +8,4 @@ from werkzeug.serving import run_with_reloader
 # p = VideoSynthesisPipeline()
 p = OpenGLPipeline()
 
-# p.run()
 run_with_reloader(p.run)
