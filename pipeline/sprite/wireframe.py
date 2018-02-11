@@ -13,9 +13,19 @@ class Wireframe(metaclass=ABCMeta):
         return np.stack((left, right)).reshape(2, 3, -1).transpose((2, 0, 1))
 
     @abstractmethod
-    def mesh(self):
+    def vertex_map(self, t):
         pass
 
+    @abstractmethod
+    def uv_map(self, t):
+        pass
+
+    def gl_draw(self, GL, vertices, uv_map):
+        GL.glBegin(GL.GL_QUADS)
+        for vertex, uv in zip(vertices, uv_map):
+            GL.glTexCoord2f(*uv)
+            GL.glVertex3fv(vertex)
+        GL.glEnd()
 
 
 class Projection2DMesh(Sprite):
@@ -77,101 +87,75 @@ class TextureMap(Sprite):
                 frame[y_start:y_stop, x_start:x_stop, :] = mapped[j, i, :]
 
 
-class SquareWireframe(Wireframe):
-    def __init__(self, length=1.):
-        self.length = length
+class FixedMaterialWireframe(Wireframe):
+    def __init__(self, grid):
+        self._vertices, self._uv, _ = np.dsplit(grid, [3, 5])
 
-        grid = np.array([
+    def vertex_map(self, t):
+        return self._vertices
+
+    def uv_map(self, t):
+        return self._uv
+
+
+class SquareWireframe(FixedMaterialWireframe):
+    def __init__(self, width=1., height=1.):
+        super().__init__(
+            np.array([
                 [
                     [
-                        -length / 2, -length / 2, 0,
+                        -height / 2, -width / 2, 0,
                         0, 0,
                     ],
                     [
-                        -length / 2,  length / 2, 0,
+                        -height / 2,  width / 2, 0,
                         0, 1,
                     ]
                 ],
                 [
                     [
-                        length / 2,  length / 2, 0,
+                        height / 2,  width / 2, 0,
                         1, 1,
                     ],
                     [
-                        length / 2, -length / 2, 0,
+                        height / 2, -width / 2, 0,
                         1, 0,
                     ],
                 ],
-        ])
-        self.vertices, self.uv, _ = np.dsplit(grid, [3, 5])
-
-    def mesh(self, t):
-        return (self.vertices, None)
-
-    def uv_map(self):
-        return self.uv
+            ])
+        )
         
 
-# class SquareWireframe(Wireframe):
-#     def __init__(self, length, density, *args, **kwargs):
-#         self.length = length
-#         self.density = density
-#         xs, ys = np.meshgrid(
-#             np.linspace(-self.length / 2, self.length / 2, self.density),
-#             np.linspace(-self.length / 2, self.length / 2, self.density)
-#         )
-#         self.points = np.stack((xs, ys, np.zeros(xs.shape)))
-
-#     def mesh(self, t):
-#         vertices = self.points.reshape(3, -1).T
-#         edges = np.concatenate((
-#             self.adj_to_edges(
-#                 self.points[:, :-1, :], 
-#                 self.points[:, 1:, :]
-#             ),
-#             self.adj_to_edges(
-#                 self.points[:, :, :-1], 
-#                 self.points[:, :, 1:]
-#             )
-#         ))
-
-
-class SphereWireframe(Wireframe):
+class SphereWireframe(FixedMaterialWireframe):
     def __init__(self, r, density):
         self.radius = r
         self.density = density
+        
         theta, phi = np.meshgrid(
             np.linspace(-np.pi, np.pi, self.density),
             np.linspace(-np.pi/2, np.pi/2, self.density),
         )
-        self.points = np.stack((
-            self.radius*np.sin(theta)*np.cos(phi),
-            self.radius*np.sin(theta)*np.sin(phi),
-            self.radius*np.cos(theta),
-        ))
+        super().__init__(
+            np.stack(
+                (
+                    np.sin(theta)*np.cos(phi),
+                    np.sin(theta)*np.sin(phi),
+                    np.cos(theta),
+                    phi / 2*np.pi,
+                    1 - theta / np.pi,
+                ), 
+                axis=-1
+            )
+        )
 
-    def mesh(self, t):
-        vertices = self.points
-        edges = np.concatenate((
-            self.adj_to_edges(
-                self.points[:, :-1, :],
-                self.points[:, 1:, :],
-            ),
-            self.adj_to_edges(
-                self.points[:, :, :-1],
-                self.points[:, :, 1:],
-            ),
-        ))
-
-        return (vertices, edges)
-
-    def uv_map(self):
-        d = self.points / np.linalg.norm(self.points, axis=0)
-        return np.stack((
-            0.5 + np.arctan2(d[0, ...], d[2, ...]) / (2 * np.pi),
-            0.5 + d[1] * 0.5,
-        ))
-
+    def gl_draw(self, GL, vertices, uv_map):
+        GL.glBegin(GL.GL_QUAD_STRIP)
+        for vertex, uv in zip(vertices, uv_map):
+            GL.glNormal3fv(vertex)
+            GL.glTexCoord2f(*uv)
+            GL.glVertex3fv(self.radius * vertex)
+        GL.glEnd()
+    
 
 class WireframeProcessor(Wireframe):
     def __call__(self, wireframe):

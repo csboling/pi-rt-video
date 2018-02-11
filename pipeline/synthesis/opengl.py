@@ -2,6 +2,7 @@ from abc import abstractmethod
 from io import BytesIO
 
 import numpy as np
+from OpenGL import GL
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import pyglet
@@ -42,17 +43,17 @@ class Rotate(OpenGLProcessor):
 
 
 class BindTexture(OpenGLProcessor):
-    def __init__(self, wireframe, texture):
+    def __init__(self, wireframe, texture, texture_res=(100, 100)):
         self.wireframe = wireframe
         self.texture = texture
+        self.texture_res = texture_res
 
         self.gl_setup()
 
     def __call__(self, surface, t):
-        w, h = (100, 100)
-        texture = self.texture((w, h), t)
-        uv_map = self.wireframe.uv_map()
-        vertices, _ = self.wireframe.mesh(t)
+        texture = self.texture(self.texture_res, t)
+        uv_map = self.wireframe.uv_map(t)
+        vertices = self.wireframe.vertex_map(t)
 
         self.gl_draw(
             self.to_rgba(texture).astype(np.uint8),
@@ -75,8 +76,8 @@ class BindTexture(OpenGLProcessor):
     def gl_draw(self, texture, vertices, uv_map):
         w, h = texture.shape[:2]
 
-        # import pdb; pdb.set_trace()
         glEnable(GL_TEXTURE_2D)
+
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL)
         glBindTexture(GL_TEXTURE_2D, self.texture_id)
         glTexImage2D(
@@ -89,11 +90,7 @@ class BindTexture(OpenGLProcessor):
         )
         glGenerateMipmap(GL_TEXTURE_2D)
 
-        glBegin(GL_QUADS)
-        for vertex, uv in zip(vertices, uv_map):
-            glTexCoord2f(*uv)
-            glVertex3fv(vertex)
-        glEnd()
+        self.wireframe.gl_draw(GL, vertices, uv_map)
 
         glDisable(GL_TEXTURE_2D)
 

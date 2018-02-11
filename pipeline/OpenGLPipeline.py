@@ -28,8 +28,10 @@ class OpenGLPipeline(Pipeline):
          
             Clear(),
             BindTexture(
-                wireframe=SquareWireframe(length=2.),
-                texture=WeirdSineColorMap()
+                wireframe=SquareWireframe(width=3., height=2.),
+                # SphereWireframe(r=1., density=20),
+                texture=WeirdSineColorMap(),
+                texture_res=(50, 50)
             ),
             Rotate(lambda t: (0.5, 0., 0.5)),
         ])
