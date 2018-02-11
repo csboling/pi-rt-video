@@ -2,20 +2,26 @@ import cv2
 import numpy as np
 
 from pipeline.Pipeline import Pipeline
-from pipeline.animation import CircularMotion
 from pipeline.playback import PlaybackSink
+
+from pipeline.animation import CircularMotion
+from pipeline.animation.parametric import (
+    LissajousCurve,
+    RoseCurve,
+)
 from pipeline.processor.geometry import Rotate
-from pipeline.processor.synthesis.source import VideoSynthesisSource
 from pipeline.processor.synthesis.adapters import SurfarrayAdapter
 from pipeline.processor.synthesis.draw import (
+    Fill,
     Pen,
     ROYGBIV,
 )
-from pipeline.animation.parametric import (
-    LissajousCurve, 
-    RoseCurve,
+from pipeline.processor.synthesis.source import VideoSynthesisSource
+from pipeline.processor.synthesis.wireframe import (
+    ProjectWireframe,
+    # Rotate3D,
+    Square,
 )
-from pipeline.sprite.shape import Square
 
 
 class VideoSynthesisPipeline(Pipeline):
@@ -24,16 +30,16 @@ class VideoSynthesisPipeline(Pipeline):
         w, h = source.resolution
         super().__init__([
             source,
-            Pen(
-                animation=RoseCurve(
-                    X=100, Y=100,
-                    k=np.pi,
-                    v=lambda t: 0.3*np.cos(t)**2,
-                ),
-                colors=ROYGBIV
+            Fill((0, 0, 0)),
+            ProjectWireframe(
+                Square(length=300, points=20),
+                # Rotate3D(lambda t: (t, 0, 0))(
+                #     Square(length=100, points=20)
+                # ),
+                vertex_color=(255, 0, 0),
+                edge_color=(0, 255, 0)
             ),
             SurfarrayAdapter(),
-            Rotate(lambda t: 6 * np.pi * t),
         ])
 
     def run(self):

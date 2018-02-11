@@ -12,7 +12,6 @@ class Rotate(Processor):
         t = 0
         for frame in self.source:
             w, h = self.resolution
-            t = (t + 1 / self.framerate)
             M = cv2.getRotationMatrix2D((w // 2, h // 2), self.angle_func(t), 1.)
             yield cv2.warpAffine(
                 frame, M,
@@ -20,3 +19,4 @@ class Rotate(Processor):
                 borderMode=cv2.BORDER_CONSTANT,
                 borderValue=(100, 100, 100)
             )
+            t = (t + 1 / self.framerate)
