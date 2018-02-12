@@ -1,6 +1,12 @@
 from abc import ABCMeta, abstractmethod
 
 import numpy as np
+from meshpy.tet import MeshInfo, build
+from meshpy.geometry import (
+    EXT_OPEN,
+    generate_surface_of_revolution,
+    GeometryBuilder,
+)
 import pygame
 
 from pipeline.sprite.Sprite import Sprite
@@ -12,13 +18,13 @@ class Wireframe(metaclass=ABCMeta):
     def adj_to_edges(left, right):
         return np.stack((left, right)).reshape(2, 3, -1).transpose((2, 0, 1))
 
-    @abstractmethod
-    def vertex_map(self, t):
-        pass
+    # @abstractmethod
+    # def vertex_map(self, t):
+    #     pass
 
-    @abstractmethod
-    def uv_map(self, t):
-        pass
+    # @abstractmethod
+    # def uv_map(self, t):
+    #     pass
 
     def gl_draw(self, GL, vertices, uv_map):
         GL.glBegin(GL.GL_QUADS)
@@ -98,63 +104,145 @@ class FixedMaterialWireframe(Wireframe):
         return self._uv
 
 
-class SquareWireframe(FixedMaterialWireframe):
-    def __init__(self, width=1., height=1.):
-        super().__init__(
-            np.array([
-                [
-                    [
-                        -height / 2, -width / 2, 0,
-                        0, 0,
-                    ],
-                    [
-                        -height / 2,  width / 2, 0,
-                        0, 1,
-                    ]
-                ],
-                [
-                    [
-                        height / 2,  width / 2, 0,
-                        1, 1,
-                    ],
-                    [
-                        height / 2, -width / 2, 0,
-                        1, 0,
-                    ],
-                ],
-            ])
-        )
+class SquareWireframe(Wireframe):
+    def __init__(self, width=1., height=1., center=(0., 0., 0.)):
+        x, y, z = center
+        self._quads = np.array([
+            [
+                [x - height / 2, y - width / 2, z],
+                [x - height / 2, y + width / 2, z],
+                [x + height / 2, y + width / 2, z],
+                [x + height / 2, y - width / 2, z],
+            ],
+        ])
+        self._uv = np.array([
+            [
+                [0, 0],
+                [0, 1],
+                [1, 1],
+                [1, 0],
+            ],
+        ])
+
+    def quads(self, t):
+        return self._quads
+
+    def uv(self, t):
+        return self._uv
+
+
+class CubeWireframe(Wireframe):
+    def __init__(self, width=1., height=1., depth=1., center=(0., 0., 0.)):
+        x, y, z = center
+        self._quads = np.array([
+            [
+                # back 
+                [x + width / 2, y - height / 2, z - depth / 2],
+                [x + width / 2, y + height / 2, z - depth / 2],
+                [x - width / 2, y + height / 2, z - depth / 2],
+                [x - width / 2, y - height / 2, z - depth / 2],
+            ],
+            [
+                # front
+                [x - width / 2, y - height / 2, z + depth / 2],
+                [x - width / 2, y + height / 2, z + depth / 2],
+                [x + width / 2, y + height / 2, z + depth / 2],
+                [x + width / 2, y - height / 2, z + depth / 2],
+            ],
+            # [
+            #     # left
+            #     [x - width / 2, y - height / 2, z + depth / 2],
+            #     [x - width / 2, y + height / 2, z + depth / 2],
+            #     [x - width / 2, y + height / 2, z - depth / 2],
+            #     [x - width / 2, y - height / 2, z - depth / 2],
+            # ],
+            # [
+            #     #right
+            #     [x + width / 2, y - height / 2, z + depth / 2],
+            #     [x + width / 2, y + height / 2, z + depth / 2],
+            #     [x + width / 2, y + height / 2, z - depth / 2],
+            #     [x + width / 2, y - height / 2, z - depth / 2],
+            # ],
+            # [
+            #     #top
+            #     [x - width / 2, y + height / 2, z + depth / 2],
+            #     [x - width / 2, y + height / 2, z - depth / 2],
+            #     [x + width / 2, y + height / 2, z - depth / 2],
+            #     [x + width / 2, y + height / 2, z + depth / 2],
+            # ],
+            # [
+            #     #bottom
+            #     [x - width / 2, y - height / 2, z - depth / 2],
+            #     [x - width / 2, y - height / 2, z + depth / 2],
+            #     [x + width / 2, y - height / 2, z + depth / 2],
+            #     [x + width / 2, y - height / 2, z - depth / 2],
+            # ],
+        ])
+
+        self._uv = np.array([
+            [
+                [0, 0],
+                [0, 1],
+                [1, 1],
+                [1, 0],
+            ]
+        ]*2)
+
+    def quads(self, t):
+        return self._quads
+
+    def uv(self, t):
+        return self._uv
+                
+
+        # back   = SquareWireframe(width, height, z=-depth / 2)
+        # front  = SquareWireframe(width, height, z= depth / 2)
+        # bottom = SquareWireframe(width, height, z= depth / 2)
+        
         
 
-class SphereWireframe(FixedMaterialWireframe):
+class SphereWireframe(Wireframe):
     def __init__(self, r, density):
         self.radius = r
         self.density = density
-        
-        theta, phi = np.meshgrid(
-            np.linspace(-np.pi, np.pi, self.density),
-            np.linspace(-np.pi/2, np.pi/2, self.density),
-        )
-        super().__init__(
-            np.stack(
-                (
-                    np.sin(theta)*np.cos(phi),
-                    np.sin(theta)*np.sin(phi),
-                    np.cos(theta),
-                    phi / 2*np.pi,
-                    1 - theta / np.pi,
-                ), 
-                axis=-1
+
+        phi = np.linspace(0, np.pi, self.density)
+        rz = np.stack((
+            self.radius*np.sin(phi),
+            self.radius*np.cos(phi),   
+        ), axis=-1)
+
+        geob = GeometryBuilder()
+        geob.add_geometry(
+            *generate_surface_of_revolution(
+                rz,
+                closure=EXT_OPEN,
+                radial_subdiv=self.density
             )
         )
+        mesh_info = MeshInfo()
+        geob.set(mesh_info)
+        self.mesh = build(mesh_info)
+        self._quads = np.array([
+            [self.mesh.points[ix] for ix in element]
+            for element in self.mesh.elements
+        ])
+        self._uv = self.calculate_uv(
+            self._quads.reshape((-1, 3))
+        ).reshape((-1, 4, 2))
 
-    def gl_draw(self, GL, vertices, uv_map):
-        GL.glBegin(GL.GL_QUAD_STRIP)
-        for vertex, uv in zip(vertices, uv_map):
-            GL.glNormal3fv(vertex)
-            GL.glTexCoord2f(*uv)
-            GL.glVertex3fv(self.radius * vertex)
-        GL.glEnd()
+    def calculate_uv(self, points):
+        d = (-points.T / np.linalg.norm(points, axis=-1)).T
+        return np.stack((
+            0.5 + d[:, 1]*0.5,
+            0.5 + np.arctan2(d[:, 0], d[:, 2]) / (2*np.pi),
+        ), axis=-1)
+
+    def quads(self, t):
+        return self._quads
+
+    def uv(self, t):
+        return self._uv
     
 
 class WireframeProcessor(Wireframe):

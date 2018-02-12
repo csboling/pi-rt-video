@@ -52,13 +52,17 @@ class BindTexture(OpenGLProcessor):
 
     def __call__(self, surface, t):
         texture = self.texture(self.texture_res, t)
-        uv_map = self.wireframe.uv_map(t)
-        vertices = self.wireframe.vertex_map(t)
+        quads = self.wireframe.quads(t)
+        uv = self.wireframe.uv(t)
+        # uv_map = self.wireframe.uv_map(t)
+        # vertices = self.wireframe.vertex_map(t)
 
         self.gl_draw(
             self.to_rgba(texture).astype(np.uint8),
-            vertices.reshape((-1, 3)),
-            uv_map.reshape((-1, 2))
+            quads,
+            uv,
+            # vertices.reshape((-1, 3)),
+            # uv_map.reshape((-1, 2))
         )
 
 
@@ -73,7 +77,7 @@ class BindTexture(OpenGLProcessor):
             GL_TEXTURE_MIN_FILTER, GL_LINEAR
         )
     
-    def gl_draw(self, texture, vertices, uv_map):
+    def gl_draw(self, texture, quads, uv):
         w, h = texture.shape[:2]
 
         glEnable(GL_TEXTURE_2D)
@@ -90,7 +94,12 @@ class BindTexture(OpenGLProcessor):
         )
         glGenerateMipmap(GL_TEXTURE_2D)
 
-        self.wireframe.gl_draw(GL, vertices, uv_map)
+        for quad_verts, quad_uvs in zip(quads, uv):
+            glBegin(GL_QUADS)
+            for vertex, uv in zip(quad_verts, quad_uvs):
+                glTexCoord2f(*uv)
+                glVertex3fv(vertex)
+            glEnd()
 
         glDisable(GL_TEXTURE_2D)
 

@@ -3,6 +3,7 @@ from pipeline.Pipeline import Pipeline
 from pipeline.sprite.wireframe import (
     SphereWireframe,
     SquareWireframe,
+    CubeWireframe,
 )
 from pipeline.synthesis.opengl import (
     BindTexture,
@@ -19,7 +20,7 @@ class OpenGLPipeline(Pipeline):
 
     def __init__(self):
         source = VideoSynthesisSource(
-            framerate=24, resolution=(640, 480)
+            framerate=24, resolution=(320, 240)
         )
         w, h = source.resolution
 
@@ -28,10 +29,10 @@ class OpenGLPipeline(Pipeline):
          
             Clear(),
             BindTexture(
-                wireframe=SquareWireframe(width=3., height=2.),
-                # SphereWireframe(r=1., density=20),
+                wireframe=CubeWireframe(width=2., height=2., depth=2.),
+                # wireframe=SphereWireframe(r=1., density=20),
                 texture=WeirdSineColorMap(),
-                texture_res=(50, 50)
+                texture_res=(100, 100)
             ),
             Rotate(lambda t: (0.5, 0., 0.5)),
         ])
