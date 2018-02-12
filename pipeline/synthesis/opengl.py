@@ -23,6 +23,69 @@ class OpenGLProcessor(Processor):
     def __call__(self, surface, t):
         pass
 
+class TexturedSphere(OpenGLProcessor):
+
+    def __init__(self, texture, texture_res=(112, 112)):
+        self.texture = texture
+        self.texture_res = texture_res
+
+        self.texture_id = glGenTextures(1)
+        self.sphere = gluNewQuadric()
+
+
+    def __del__(self):
+        gluDeleteQuadric(self.sphere)
+
+    def __call__(self, surface, t):
+        texture = self.texture(self.texture_res, t)
+        w, h = texture.shape[:2]
+
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, self.texture_id)
+        glTexParameteri(
+            GL_TEXTURE_2D,
+            GL_TEXTURE_MAG_FILTER, GL_LINEAR
+        )
+        glTexParameteri(
+            GL_TEXTURE_2D,
+            GL_TEXTURE_MIN_FILTER, GL_LINEAR
+        )
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0, GL_RGB,
+            w, h,
+            0, GL_RGB,
+            GL_UNSIGNED_BYTE,
+            np.flip(texture, axis=-1).astype(np.uint8)
+        )
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL)
+        gluQuadricTexture(self.sphere, GL_TRUE)
+        gluQuadricDrawStyle(self.sphere, GLU_FILL)
+        gluQuadricNormals(self.sphere, GLU_SMOOTH)
+        gluSphere(self.sphere, 1.5, 20, 20)
+
+        glDisable(GL_TEXTURE_2D)
+
+    @staticmethod
+    def to_rgba(texture):
+        dims, depth = texture.shape[:2], texture.shape[2]
+        if depth == 4:
+            return texture
+        alpha_channel = 255*np.ones((*dims, 1))
+        if depth == 3:
+            return np.concatenate(
+                (texture, alpha_channel),
+                axis=-1
+            )
+        if depth == 1:
+            return np.concatenate(
+                (*[texture]*3, alpha_channel),
+                axis=-1
+            )
+        raise TypeError(
+            "don't know how to treat shape {} as a texture".format(texture.shape)
+        )
+
 
 class Clear(OpenGLProcessor):
 
@@ -54,17 +117,12 @@ class BindTexture(OpenGLProcessor):
         texture = self.texture(self.texture_res, t)
         quads = self.wireframe.quads(t)
         uv = self.wireframe.uv(t)
-        # uv_map = self.wireframe.uv_map(t)
-        # vertices = self.wireframe.vertex_map(t)
 
         self.gl_draw(
             self.to_rgba(texture).astype(np.uint8),
             quads,
             uv,
-            # vertices.reshape((-1, 3)),
-            # uv_map.reshape((-1, 2))
         )
-
 
     def gl_setup(self):
         self.texture_id = glGenTextures(1)

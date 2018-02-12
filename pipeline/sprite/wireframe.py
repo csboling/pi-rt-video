@@ -144,39 +144,39 @@ class CubeWireframe(Wireframe):
             ],
             [
                 # front
-                [x - width / 2, y - height / 2, z + depth / 2],
-                [x - width / 2, y + height / 2, z + depth / 2],
-                [x + width / 2, y + height / 2, z + depth / 2],
                 [x + width / 2, y - height / 2, z + depth / 2],
+                [x + width / 2, y + height / 2, z + depth / 2],
+                [x - width / 2, y + height / 2, z + depth / 2],
+                [x - width / 2, y - height / 2, z + depth / 2],
             ],
-            # [
-            #     # left
-            #     [x - width / 2, y - height / 2, z + depth / 2],
-            #     [x - width / 2, y + height / 2, z + depth / 2],
-            #     [x - width / 2, y + height / 2, z - depth / 2],
-            #     [x - width / 2, y - height / 2, z - depth / 2],
-            # ],
-            # [
-            #     #right
-            #     [x + width / 2, y - height / 2, z + depth / 2],
-            #     [x + width / 2, y + height / 2, z + depth / 2],
-            #     [x + width / 2, y + height / 2, z - depth / 2],
-            #     [x + width / 2, y - height / 2, z - depth / 2],
-            # ],
-            # [
-            #     #top
-            #     [x - width / 2, y + height / 2, z + depth / 2],
-            #     [x - width / 2, y + height / 2, z - depth / 2],
-            #     [x + width / 2, y + height / 2, z - depth / 2],
-            #     [x + width / 2, y + height / 2, z + depth / 2],
-            # ],
-            # [
-            #     #bottom
-            #     [x - width / 2, y - height / 2, z - depth / 2],
-            #     [x - width / 2, y - height / 2, z + depth / 2],
-            #     [x + width / 2, y - height / 2, z + depth / 2],
-            #     [x + width / 2, y - height / 2, z - depth / 2],
-            # ],
+            [
+                # left
+                [x - width / 2, y - height / 2, z - depth / 2],
+                [x - width / 2, y + height / 2, z - depth / 2],
+                [x - width / 2, y + height / 2, z + depth / 2],
+                [x - width / 2, y - height / 2, z + depth / 2],
+            ],
+            [
+                #right
+                [x + width / 2, y - height / 2, z + depth / 2],
+                [x + width / 2, y + height / 2, z + depth / 2],
+                [x + width / 2, y + height / 2, z - depth / 2],
+                [x + width / 2, y - height / 2, z - depth / 2],
+            ],
+            [
+                #top
+                [x - width / 2, y + height / 2, z + depth / 2],
+                [x - width / 2, y + height / 2, z - depth / 2],
+                [x + width / 2, y + height / 2, z - depth / 2],
+                [x + width / 2, y + height / 2, z + depth / 2],
+            ],
+            [
+                #bottom
+                [x - width / 2, y - height / 2, z - depth / 2],
+                [x - width / 2, y - height / 2, z + depth / 2],
+                [x + width / 2, y - height / 2, z + depth / 2],
+                [x + width / 2, y - height / 2, z - depth / 2],
+            ],
         ])
 
         self._uv = np.array([
@@ -186,7 +186,7 @@ class CubeWireframe(Wireframe):
                 [1, 1],
                 [1, 0],
             ]
-        ]*2)
+        ]*6)
 
     def quads(self, t):
         return self._quads
@@ -245,39 +245,49 @@ class SphereWireframe(Wireframe):
         return self._uv
     
 
-class WireframeProcessor(Wireframe):
-    def __call__(self, wireframe):
-        self.wireframe = wireframe 
-        return self
+# class WireframeProcessor(Wireframe):
+#     def __call__(self, wireframe):
+#         self.wireframe = wireframe 
+#         return self
 
-    def mesh(self, t):
-        return self.apply(self.wireframe, t)
+#     def (self, t):
+#         return self.apply(self.wireframe, t)
 
-    def uv_map(self):
-        return self.wireframe.uv_map()
+#     def uv_map(self):
+#         return self.wireframe.uv_map()
 
 
-class Rotate3D(WireframeProcessor):
+class Rotate3D(Wireframe):
 
     def __init__(self, func):
         self.func = func
         
-    def apply(self, w, t):
-        vertices, edges = w.mesh(t)
-        angle = self.func(t)
-        return self.rotate(vertices, edges, angle)
+    def __call__(self, wireframe):
+        self.source = wireframe
+        return self
+
+    # def apply(self, w, t):
+    #     vertices = w.vertex_map(t)
+    #     uv = w.uv_map(t)
+    #     angle = self.func(t)
+    #     return self.rotate(vertices, edges, angle)
+ 
+    def quads(self, t):
+        R = self.rotation_matrix(self.func(t))
+        return np.einsum('ij,klj->kli', R, self.source.quads(t))
+
+    def uv(self, t):
+        R = self.rotation_matrix(self.func(t))
+        return np.einsum('ij,klj->kli', R[:2, :2], self.source.uv(t))
 
     @classmethod
-    def rotate(cls, vertices, edges, angle):
+    def rotation_matrix(cls, angle):
         alpha, beta, gamma = angle
-        R = cls.rotate_z(gamma).dot(
+        return cls.rotate_z(gamma).dot(
             cls.rotate_y(beta)
         ).dot(
             cls.rotate_x(alpha)
         )
-        rotated_vertices = np.einsum('ij,jkl->ikl', R, vertices)
-        rotated_edges = np.einsum('ij,klj->kli', R, edges)
-        return (rotated_vertices, rotated_edges)
             
     @staticmethod
     def rotate_x(theta):
