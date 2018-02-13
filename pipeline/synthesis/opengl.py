@@ -11,7 +11,8 @@ import pyglet
 
 from pipeline.processor.Processor import Processor
 from pipeline.processor.pure import PureFunction
-from pipeline.utils import params
+from pipeline.synthesis import geometry
+from pipeline.utils import params, Parameter
 
 
 class OpenGLProcessor(Processor):
@@ -33,15 +34,18 @@ class Clear(OpenGLProcessor):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         return surface
 
-    
+
 class Shader(OpenGLProcessor):
     def __init__(self, program, line_mode=gl.GL_TRIANGLE_STRIP):
         self.program = program
         self.line_mode = line_mode
     
     def __call__(self, surface, t):
-        self.program.draw(self.line_mode)
+        self.draw()
         return self
+
+    def draw(self):
+        self.program.draw(self.line_mode)
         
 
 class ColorSquare(Shader):
@@ -85,7 +89,7 @@ class ColorSquare(Shader):
         self.program['color'] = self.corner_colors(t)
         self.program['position'] = self.position
         self.program['scale'] = 1.0
-        super().__call__(surface, t)
+        return super().__call__(surface, t)
         
         
 class Perspective(Shader):
@@ -93,17 +97,19 @@ class Perspective(Shader):
         positions=None,
         indices=None,
         model=np.eye(4, dtype=np.float32),
-        view=np.eye(4, dtype=np.float32),
-        projection=np.eye(4, dtype=np.float32)
+        view=geometry.translation_matrix((0, 0, -5)),
+        projection=np.eye(4, dtype=np.float32),
     )
-    def __init__(self, positions, indices, model, view, projection, *args, **kwargs):
+    def __init__(self,
+                 vertex_count, positions, indices,
+                 model, view, projection,
+                 *args, **kwargs):
         self.positions = positions
         self.indices = indices
         self.model = model
         self.view = view
         self.projection = projection
 
-        
         gl.glEnable(gl.GL_DEPTH_TEST)
         
         super().__init__(gloo.Program(
@@ -116,7 +122,10 @@ class Perspective(Shader):
 
             void main()
             {
-                gl_Position = u_projection * u_view * u_model * vec4(a_position, 1.0);
+                gl_Position = u_projection *
+                              u_view *
+                              u_model *
+                              vec4(a_position, 1.0);
             }
             ''',
             fragment='''
@@ -127,65 +136,51 @@ class Perspective(Shader):
             '''
         ), *args, **kwargs)
 
+        self.vertex_buffer = np.zeros(
+            vertex_count,
+            [('a_position', np.float32, 3)]
+        ).view(gloo.VertexBuffer)
+
     def __call__(self, surface, t):
-        # positions = self.positions(t)
-        # indices = self.indices(t)
-        width, height, depth = 2, 2, 2
-        positions = np.array([
-            [ width / 2,  height / 2,  depth / 2],
-            [-width / 2,  height / 2,  depth / 2],            
-            [-width / 2, -height / 2,  depth / 2],
-            [ width / 2, -height / 2,  depth / 2],
-            
-            [ width / 2, -height / 2, -depth / 2],
-            [ width / 2,  height / 2, -depth / 2],
-            [-width / 2,  height / 2, -depth / 2],
-            [-width / 2, -height / 2, -depth / 2],
-        ])
-        indices = np.array([
-            0, 1, 2,
-            0, 2, 3,
-            0, 3, 4,
-            0, 4, 5,
-            0, 5, 6,
-            0, 6, 1,
-            1, 6, 7,
-            1, 7, 2,
-            7, 3, 2,
-            7, 4, 3,
-            4, 7, 6,
-            4, 6, 5,
-        ], dtype=np.uint32)
-        V = positions.view(gloo.VertexBuffer)
-        I = indices.view(gloo.IndexBuffer)
-
-        # model = self.model(t)
-        # view = self.view(t)
-        # projection = self.projection(t)
-        model = np.eye(4, dtype=np.float32)
-        view = np.eye(4, dtype=np.float32)
-        glm.translate(view, 0, 0, -5)
-        # projection = np.eye(4, dtype=np.float32)
-        w, h = self.resolution
-        projection = glm.perspective(45.0, w / h, 2.0, 100.0)
+        self.vertex_buffer['a_position'] = self.positions(t)
+        self.index_buffer = self.indices(t).view(gloo.IndexBuffer)
+        self.program.bind(self.vertex_buffer)
         
-        self.program['a_position'] = V
-        self.program['u_model'] = model
-        self.program['u_view'] = view
-        self.program['u_projection'] = projection
+        self.program['u_model'] = self.model(t)
+        self.program['u_view'] = self.view(t)
+        self.program['u_projection'] = self.projection(t)
 
-        self.program.draw(self.line_mode, I)
+        return super().__call__(surface, t)
         
+    def draw(self):
+        self.program.draw(self.line_mode, self.index_buffer)
+
 
 class WireframePerspective(Perspective):
     def __init__(self, wireframe, *args, **kwargs):
+        positions = wireframe.verts.reshape((-1, 3))
         super().__init__(
-            positions=wireframe.verts.reshape((-1, 3)),
+            vertex_count=positions.shape[0],
+            positions=positions,
             indices=wireframe.inds.reshape((-1,)),
             *args, **kwargs
         )
+
+
+class Rotation(Parameter):
+    @params(angle=None, matrix=None)
+    def __init__(self, angle, matrix):
+        self.angle = angle
+        self.matrix = matrix
+
+    def __call__(self, t):
+        alpha, beta, gamma = self.angle(t)
+        matrix = self.matrix(t)
+        glm.rotate(matrix, alpha, 1, 0, 0)
+        glm.rotate(matrix, beta,  0, 1, 0)
+        glm.rotate(matrix, gamma, 0, 0, 1)
+        return matrix
         
-    
     
 # class TexturedSphere(OpenGLProcessor):
 

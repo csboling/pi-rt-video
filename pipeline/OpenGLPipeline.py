@@ -15,6 +15,7 @@ from pipeline.synthesis.opengl import (
     WireframePerspective,
     Clear,
     ColorSquare,
+    Rotation,
 )
 from pipeline.synthesis.pattern import (
     AnimatedColorMap,
@@ -42,17 +43,14 @@ class OpenGLPipeline(Pipeline):
             source,
          
             Clear(),
-            ColorSquare(corner_colors=lambda t: [
-                [np.cos(t), 0,         0,                   1],
-                [0,         np.sin(1), 0,                   1],
-                [0,         0,         np.cos(1)*np.sin(t), 1],
-                [np.cos(t), np.sin(t), 0,                   1],
-            ]),
-            
-            # WireframePerspective(
-            #     wireframe=CubeWireframe(width=2, height=2, depth=2),
-            #     projection=glm.perspective(45., w / h, 2., 100.),
-            # ),
+            WireframePerspective(
+                wireframe=CubeWireframe(width=2, height=2, depth=2),
+                projection=glm.perspective(45., w / h, 2., 100.),
+                model=Rotation(
+                    angle=lambda t: (t, 0, t),
+                    matrix=lambda t: np.eye(4)
+                )
+            ),
         ])
 
     def run(self):
