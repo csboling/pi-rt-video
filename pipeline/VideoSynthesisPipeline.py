@@ -39,17 +39,10 @@ from pipeline.synthesis.pattern import (
     UniformColorMap,
     WeirdSineColorMap,
 )
-from pipeline.sprite.wireframe import (
-    Projection2DMesh,
-    Rotate3D,
-    SphereWireframe,
-    SquareWireframe,
-    TextureMap,
-)
 
 
 class VideoSynthesisPipeline(Pipeline):
-    downsampling = 8
+    downsampling = 4
 
     def __init__(self):
         source = VideoSynthesisSource(
@@ -64,26 +57,10 @@ class VideoSynthesisPipeline(Pipeline):
         super().__init__([
             source,
 
-            # SurfarrayAdapter(),
-            # Resample(1/self.downsampling),
-            # AnimateMap(WeirdSineColorMap()),
-            # Resample(self.downsampling),
-
-            Fill((0, 0, 0)),
-            Occlusion(
-                animation=NoAnimation((w / 2, h / 2)),
-                sprite=Projection2DMesh(
-                    wireframe=reduce(
-                        lambda w, f: f(w),
-                        [
-                            SphereWireframe(150, points=20),
-                            Rotate3D(lambda t: (t, 0, t)),
-                        ],
-                    ),
-                    vertex_color=(0, 0, 255),
-                    edge_color=(0, 255, 0)
-                )
-            ),
+            SurfarrayAdapter(),
+            Resample(1/self.downsampling),
+            AnimateMap(WeirdSineColorMap()),
+            Resample(self.downsampling),
         ])
 
     def run(self):

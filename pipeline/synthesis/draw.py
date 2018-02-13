@@ -29,6 +29,7 @@ def parse_color(color, gradient_points):
     c = next(it)
     return lambda *args: next(it)
 
+
 class Pen(Processor):
     def __init__(self, animation, colors, points=20):
         self.animation = animation
@@ -47,6 +48,7 @@ class Pen(Processor):
             prev_pos = pos
             t = (t + 1 / self.framerate)
             yield surface
+
 
 class Circle(Sprite):
     def __init__(self, radius, color):

@@ -21,3 +21,18 @@ class Processor(metaclass=ABCMeta):
     @abstractmethod
     def iterate(self):
         pass
+
+
+class TimeProcessor(Processor):
+
+    def iterate(self):
+        t = 0
+        for item in self.source:
+            self(item, t)
+            yield item
+            t += 1 / self.framerate
+
+    @abstractmethod
+    def __call__(self, item, t):
+        pass
+        
