@@ -33,7 +33,7 @@ class OpenGLPipeline(Pipeline):
         camera_frames = iter(camera)
 
         source = VideoSynthesisSource(
-            framerate=24,
+            framerate=24, resolution=(320, 240)
         )
         w, h = source.resolution
 
@@ -46,7 +46,7 @@ class OpenGLPipeline(Pipeline):
                 [np.cos(t), 0,         0,                   1],
                 [0,         np.sin(1), 0,                   1],
                 [0,         0,         np.cos(1)*np.sin(t), 1],
-                [np.cos(t) + np.sin(t), np.cos(t) - np.sin(t), 0,                   1],
+                [np.cos(t), np.sin(t), 0,                   1],
             ]),
             
             # WireframePerspective(
