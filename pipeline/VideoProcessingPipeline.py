@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from pipeline.capture import VideoSource
+from pipeline.capture import CameraSource
 from pipeline.Pipeline import Pipeline
 from pipeline.playback.opencv import OpenCVSink
 
@@ -24,7 +24,7 @@ class VideoProcessingPipeline(Pipeline):
     
     def __init__(self):
         super().__init__([
-            VideoSource((656, 416)),
+            CameraSource((656, 416)),
             Lift(
                 cv2.resize,
                 (0, 0), fx=1/self.downsampling, fy=1/self.downsampling,

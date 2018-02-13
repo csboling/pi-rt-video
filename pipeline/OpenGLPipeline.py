@@ -4,7 +4,6 @@ import numpy as np
 from glumpy import glm, gloo
 
 from pipeline.Pipeline import Pipeline
-from pipeline.capture import VideoSource
 from pipeline.sprite.wireframe import (
     SphereWireframe,
     BoxWireframe,
@@ -30,9 +29,6 @@ from pipeline.playback.opengl import OpenGLPygameSink
 class OpenGLPipeline(Pipeline):
 
     def __init__(self):
-        # camera = VideoSource(resolution=(112, 112))
-        # camera_frames = iter(camera)
-
         source = VideoSynthesisSource(
             framerate=24, resolution=(320, 240)
         )

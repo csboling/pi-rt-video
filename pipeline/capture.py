@@ -4,7 +4,7 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 
 
-class VideoSource:
+class CameraSource:
     def __init__(self, resolution=(640, 480), framerate=30):
         self.camera = PiCamera()
         self.camera.resolution = resolution
