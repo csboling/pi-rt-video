@@ -11,8 +11,11 @@ class OpenGLPygameSink(PygameSink):
         super().initialize(res, flags | DOUBLEBUF | OPENGL)
         
         w, h = res
-        GLU.gluPerspective(45, w / h, 0.1, 50.)
-        GL.glTranslate(0., 0., -5)
+        # GL.glEnable(GL.GL_DEPTH_TEST)
+        # GLU.gluPerspective(45, w / h, 0.1, 50.)
+        # GL.glTranslate(0., 0., -5)
 
     def process(self, item):
         pygame.display.flip()
+
+

@@ -38,8 +38,8 @@ def process_param(value):
         return value
     if callable(value):
         return Parameter(value)
-    if isinstance(value, collections.Iterable):
-        return Iterator(value)
+    # if isinstance(value, collections.Iterable):
+    #     return Iterator(value)
     return Constant(value)
 
 

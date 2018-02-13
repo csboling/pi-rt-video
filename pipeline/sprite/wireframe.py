@@ -134,59 +134,88 @@ class SquareWireframe(Wireframe):
 class CubeWireframe(Wireframe):
     def __init__(self, width=1., height=1., depth=1., center=(0., 0., 0.)):
         x, y, z = center
-        self._quads = np.array([
-            [
-                # back 
-                [x + width / 2, y - height / 2, z - depth / 2],
-                [x + width / 2, y + height / 2, z - depth / 2],
-                [x - width / 2, y + height / 2, z - depth / 2],
-                [x - width / 2, y - height / 2, z - depth / 2],
-            ],
-            [
-                # front
-                [x + width / 2, y - height / 2, z + depth / 2],
-                [x + width / 2, y + height / 2, z + depth / 2],
-                [x - width / 2, y + height / 2, z + depth / 2],
-                [x - width / 2, y - height / 2, z + depth / 2],
-            ],
-            [
-                # left
-                [x - width / 2, y - height / 2, z - depth / 2],
-                [x - width / 2, y + height / 2, z - depth / 2],
-                [x - width / 2, y + height / 2, z + depth / 2],
-                [x - width / 2, y - height / 2, z + depth / 2],
-            ],
-            [
-                #right
-                [x + width / 2, y - height / 2, z + depth / 2],
-                [x + width / 2, y + height / 2, z + depth / 2],
-                [x + width / 2, y + height / 2, z - depth / 2],
-                [x + width / 2, y - height / 2, z - depth / 2],
-            ],
-            [
-                #top
-                [x - width / 2, y + height / 2, z + depth / 2],
-                [x - width / 2, y + height / 2, z - depth / 2],
-                [x + width / 2, y + height / 2, z - depth / 2],
-                [x + width / 2, y + height / 2, z + depth / 2],
-            ],
-            [
-                #bottom
-                [x - width / 2, y - height / 2, z - depth / 2],
-                [x - width / 2, y - height / 2, z + depth / 2],
-                [x + width / 2, y - height / 2, z + depth / 2],
-                [x + width / 2, y - height / 2, z - depth / 2],
-            ],
+        self.verts = np.array([
+            [ width / 2,  height / 2,  depth / 2],
+            [-width / 2,  height / 2,  depth / 2],            
+            [-width / 2, -height / 2,  depth / 2],
+            [ width / 2, -height / 2,  depth / 2],
+            
+            [ width / 2, -height / 2, -depth / 2],
+            [ width / 2,  height / 2, -depth / 2],
+            [-width / 2,  height / 2, -depth / 2],
+            [-width / 2, -height / 2, -depth / 2],
         ])
+        self.inds = np.array([
+            [0, 1, 2],
+            [0, 2, 3],
+            [0, 3, 4],
+            [0, 4, 5],
+            [0, 5, 6],
+            [0, 6, 1],
+            [1, 6, 7],
+            [1, 7, 2],
+            [7, 3, 2],
+            [7, 4, 3],
+            [4, 7, 6],
+            [4, 6, 5],
+        ], dtype=np.uint32)
+            
+        #     [
+        #         # back 
+        #         [x + width / 2, y - height / 2, z - depth / 2],
+        #         [x + width / 2, y + height / 2, z - depth / 2],
+        #         [x - width / 2, y + height / 2, z - depth / 2],
+        #         [x - width / 2, y - height / 2, z - depth / 2],
+        #     ],
+        #     [
+        #         # front
+        #         [x + width / 2, y - height / 2, z + depth / 2],
+        #         [x + width / 2, y + height / 2, z + depth / 2],
+        #         [x - width / 2, y + height / 2, z + depth / 2],
+        #         [x - width / 2, y - height / 2, z + depth / 2],
+        #     ],
+        #     [
+        #         # left
+        #         [x - width / 2, y - height / 2, z - depth / 2],
+        #         [x - width / 2, y + height / 2, z - depth / 2],
+        #         [x - width / 2, y + height / 2, z + depth / 2],
+        #         [x - width / 2, y - height / 2, z + depth / 2],
+        #     ],
+        #     [
+        #         #right
+        #         [x + width / 2, y - height / 2, z + depth / 2],
+        #         [x + width / 2, y + height / 2, z + depth / 2],
+        #         [x + width / 2, y + height / 2, z - depth / 2],
+        #         [x + width / 2, y - height / 2, z - depth / 2],
+        #     ],
+        #     [
+        #         #top
+        #         [x - width / 2, y + height / 2, z + depth / 2],
+        #         [x - width / 2, y + height / 2, z - depth / 2],
+        #         [x + width / 2, y + height / 2, z - depth / 2],
+        #         [x + width / 2, y + height / 2, z + depth / 2],
+        #     ],
+        #     [
+        #         #bottom
+        #         [x - width / 2, y - height / 2, z - depth / 2],
+        #         [x - width / 2, y - height / 2, z + depth / 2],
+        #         [x + width / 2, y - height / 2, z + depth / 2],
+        #         [x + width / 2, y - height / 2, z - depth / 2],
+        #     ],
+        # ])
 
-        self._uv = np.array([
-            [
-                [0, 0],
-                [0, 1],
-                [1, 1],
-                [1, 0],
-            ]
-        ]*6)
+        # self._indices = np.array([
+        # []
+            
+        
+        # self._uv = np.array([
+        #     [
+        #         [0, 0],
+        #         [0, 1],
+        #         [1, 1],
+        #         [1, 0],
+        #     ]
+        # ]*6)
 
     def quads(self, t):
         return self._quads
