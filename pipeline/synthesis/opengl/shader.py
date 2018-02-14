@@ -145,11 +145,15 @@ class Perspective(Shader):
 class WireframePerspective(Perspective):
     def __init__(self, wireframe, *args, **kwargs):
         self.wireframe = wireframe
-        positions = self.wireframe.verts.reshape((-1, 3))
+        positions = np.array(
+            self.wireframe.mesh.points
+        ).astype(np.float32).reshape((-1, 3))
         super().__init__(
             vertex_count=positions.shape[0],
             positions=positions,
-            indices=self.wireframe.inds.reshape((-1,)),
+            indices=np.array(
+                self.wireframe.mesh.elements
+            ).astype(np.uint32).reshape((-1,)),
             *args, **kwargs
         )
 
@@ -161,10 +165,10 @@ class WireframePerspective(Perspective):
         self.program['u_color'] = [1, 0, 1, 1]
         gl.glPointSize(2.0)        
         self.program.draw(gl.GL_POINTS)
+        self.program.draw(
+            gl.GL_LINES,
+            np.array(self.wireframe.mesh.edges).reshape((-1,))
+        )
         gl.glDepthMask(gl.GL_TRUE)
 
-        # self.program.draw(
-        #     gl.GL_LINES,
-        #     np.array(self.wireframe.mesh.edges).reshape((-1,))
-        # )
         

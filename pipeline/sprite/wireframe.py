@@ -18,6 +18,9 @@ class Wireframe(metaclass=ABCMeta):
     def adj_to_edges(left, right):
         return np.stack((left, right)).reshape(2, 3, -1).transpose((2, 0, 1))
 
+    def __init__(self, mesh):
+        self.mesh = mesh
+
 
 class Projection2DMesh(Sprite):
     def __init__(self, wireframe, vertex_color, edge_color):
@@ -80,58 +83,42 @@ class TextureMap(Sprite):
 
 class RectWireframe(Wireframe):
     def __init__(self, width=1., height=1.):
-        self.verts = np.array([
-            [x - height / 2, y - width / 2, z],
-            [x - height / 2, y + width / 2, z],
-            [x + height / 2, y + width / 2, z],
-            [x + height / 2, y - width / 2, z],
+        mesh_info = MeshInfo()
+        mesh_info.set_points([
+            [-height / 2, -width / 2, z],
+            [-height / 2, +width / 2, z],
+            [+height / 2, +width / 2, z],
+            [+height / 2, -width / 2, z],
         ])
-        self.inds = np.array([
-            [0, 1, 2],
-            [0, 2, 3],
-        ])
+        super().__init__(build(mesh_info))
         
 
 class BoxWireframe(Wireframe):
     def __init__(self, width=1., height=1., depth=1.):
-        self.verts = np.array([
-            [ width / 2,  height / 2,  depth / 2],
-            [-width / 2,  height / 2,  depth / 2],            
-            [-width / 2, -height / 2,  depth / 2],
-            [ width / 2, -height / 2,  depth / 2],
-            
+        mesh_info = MeshInfo()
+        mesh_info.set_points([
+            [-width / 2, -height / 2, -depth / 2],            
             [ width / 2, -height / 2, -depth / 2],
             [ width / 2,  height / 2, -depth / 2],
             [-width / 2,  height / 2, -depth / 2],
-            [-width / 2, -height / 2, -depth / 2],
+
+            [-width / 2, -height / 2,  depth / 2],
+            [ width / 2, -height / 2,  depth / 2],
+            [ width / 2,  height / 2,  depth / 2],
+            [-width / 2,  height / 2,  depth / 2],
         ])
-        self.inds = np.array([
-            [0, 1, 2],
-            [0, 2, 3],
-            [0, 3, 4],
-            [0, 4, 5],
-            [0, 5, 6],
-            [0, 6, 1],
-            [1, 6, 7],
-            [1, 7, 2],
-            [7, 4, 3],
-            [7, 3, 2],
-            [4, 7, 6],
-            [4, 6, 5],
-        ], dtype=np.uint32)
-        
-        
-class MeshpyWireframe(Wireframe):
-
-    def __init__(self, geob):
-        mesh_info = MeshInfo()
-        geob.set(mesh_info)
-        self.mesh = build(mesh_info)
-        self.verts = np.array(self.mesh.points, np.float32).reshape((-1, 3))
-        self.inds = np.array(self.mesh.elements, np.uint32).reshape((-1,))
+        mesh_info.set_facets([
+            [0, 1, 2, 3],
+            [4, 5, 6, 7],
+            [0, 4, 5, 1],
+            [1, 5, 6, 2],
+            [2, 6, 7, 3],
+            [3, 7, 4, 0],
+        ])
+        super().__init__(build(mesh_info))
 
         
-class SphereWireframe(MeshpyWireframe):
+class SphereWireframe(Wireframe):
     def __init__(self, r, density):
         self.radius = r
         self.density = density
@@ -150,7 +137,9 @@ class SphereWireframe(MeshpyWireframe):
                 radial_subdiv=self.density
             )
         )
-        super().__init__(geob)
+        mesh_info = MeshInfo()
+        geob.set(mesh_info)
+        super().__init__(build(mesh_info))
         self.uv = self.calculate_uv(self.verts)
 
     def calculate_uv(self, points):
