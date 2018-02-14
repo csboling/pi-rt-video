@@ -10,8 +10,13 @@ class OpenGLProcessor(TimeProcessor):
 
 class Clear(OpenGLProcessor):
 
+    @params(color=[0, 0, 0, 1])
+    def __init__(self, color):
+        self.color = color
+    
     def __call__(self, surface, t):
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+        gl.glClearColor(*self.color(t))
         return surface
 
     

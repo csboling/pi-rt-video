@@ -39,8 +39,7 @@ class OpenGLPipeline(Pipeline):
          
             Clear(),
             WireframePerspective(
-                # wireframe=BoxWireframe(width=2, height=2, depth=2),
-                wireframe=SphereWireframe(r=1., density=24),
+                wireframe=SphereWireframe(r=1., density=6),
                 projection=glm.perspective(45., w / h, 2., 100.),
                 model=Rotation(
                     angle=lambda t: (5*t, 0, 10*t),

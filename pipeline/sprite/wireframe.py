@@ -128,7 +128,7 @@ class MeshpyWireframe(Wireframe):
         geob.set(mesh_info)
         self.mesh = build(mesh_info)
         self.verts = np.array(self.mesh.points, np.float32).reshape((-1, 3))
-        self.inds = np.array(self.mesh.elements, np.uint32).reshape((-1, 3))
+        self.inds = np.array(self.mesh.elements, np.uint32).reshape((-1,))
 
         
 class SphereWireframe(MeshpyWireframe):

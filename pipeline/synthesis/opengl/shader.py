@@ -83,15 +83,18 @@ class Perspective(Shader):
         self.view = view
         self.projection = projection
 
-        gl.glEnable(gl.GL_DEPTH_TEST)
+        self.gl_setup()
         
         super().__init__(gloo.Program(
             vertex='''
             uniform mat4 u_model;
             uniform mat4 u_view;
             uniform mat4 u_projection;
+            uniform vec4 u_color;
 
             attribute vec3 a_position;
+
+            varying vec4 v_color;
 
             void main()
             {
@@ -99,18 +102,22 @@ class Perspective(Shader):
                               u_view *
                               u_model *
                               vec4(a_position, 1.0);
+                v_color = u_color;
             }
             ''',
             fragment='''
+            varying vec4 v_color;
+
             void main()
             {
-                gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+                gl_FragColor = v_color;
             }
             '''
         ), *args, **kwargs)
 
+        self.vertex_count = vertex_count
         self.vertex_buffer = np.zeros(
-            vertex_count,
+            self.vertex_count,
             [
                 ('a_position', np.float32, 3),
             ]
@@ -127,19 +134,37 @@ class Perspective(Shader):
 
         return super().__call__(surface, t)
 
+    def gl_setup(self):
+        gl.glEnable(gl.GL_DEPTH_TEST)
+    
     def load_vertex_buffers(self, t):
         self.vertex_buffer['a_position'] = self.positions(t)
-    
-    def draw(self):
-        self.program.draw(self.line_mode, self.index_buffer)
-
+        
+        
 
 class WireframePerspective(Perspective):
     def __init__(self, wireframe, *args, **kwargs):
-        positions = wireframe.verts.reshape((-1, 3))
+        self.wireframe = wireframe
+        positions = self.wireframe.verts.reshape((-1, 3))
         super().__init__(
             vertex_count=positions.shape[0],
             positions=positions,
-            indices=wireframe.inds.reshape((-1,)),
+            indices=self.wireframe.inds.reshape((-1,)),
             *args, **kwargs
         )
+
+    def draw(self):
+        self.program['u_color'] = [0, 1, 1, 1]
+        self.program.draw(gl.GL_TRIANGLE_STRIP, self.index_buffer)
+
+        gl.glDepthMask(gl.GL_FALSE)
+        self.program['u_color'] = [1, 0, 1, 1]
+        gl.glPointSize(2.0)        
+        self.program.draw(gl.GL_POINTS)
+        gl.glDepthMask(gl.GL_TRUE)
+
+        # self.program.draw(
+        #     gl.GL_LINES,
+        #     np.array(self.wireframe.mesh.edges).reshape((-1,))
+        # )
+        
