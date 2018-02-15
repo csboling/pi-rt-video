@@ -1,7 +1,8 @@
+from glumpy import gl, glm
+import numpy as np
+
 from pipeline.processor.Processor import TimeProcessor
 from pipeline.utils import params, Parameter
-
-from glumpy import gl, glm
 
 
 class OpenGLProcessor(TimeProcessor):
@@ -22,7 +23,7 @@ class Clear(OpenGLProcessor):
     
 class Rotation(Parameter):
     
-    @params(angle=None, matrix=None)
+    @params(angle=None, matrix=lambda t: np.eye(4))
     def __init__(self, angle, matrix):
         self.angle = angle
         self.matrix = matrix
@@ -33,4 +34,17 @@ class Rotation(Parameter):
         glm.rotate(matrix, alpha, 1, 0, 0)
         glm.rotate(matrix, beta,  0, 1, 0)
         glm.rotate(matrix, gamma, 0, 0, 1)
+        return matrix
+
+
+class Translation(Parameter):
+    @params(r=None, matrix=lambda t: np.eye(4))
+    def __init__(self, r, matrix):
+        self.r = r
+        self.matrix = matrix
+
+    def __call__(self, t):
+        r = self.r(t)
+        matrix = self.matrix(t)
+        glm.translate(matrix, *r)
         return matrix

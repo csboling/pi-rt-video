@@ -8,12 +8,13 @@ from pipeline.sprite.wireframe import (
     SphereWireframe,
     BoxWireframe,
 )
+from pipeline.sprite.mesh import CubeMesh
 from pipeline.synthesis.opengl.prelude import (
     Clear,
     Rotation,
 )
 from pipeline.synthesis.opengl.shader import (
-    WireframePerspective,
+    MeshPerspective,
     ColorSquare,
 )
 from pipeline.synthesis.pattern import (
@@ -38,8 +39,8 @@ class OpenGLPipeline(Pipeline):
             source,
          
             Clear(),
-            WireframePerspective(
-                wireframe=BoxWireframe(),
+            MeshPerspective(
+                mesh=CubeMesh(),
                 projection=glm.perspective(45., w / h, 2., 100.),
                 model=Rotation(
                     angle=lambda t: (5*t, 0, 10*t),

@@ -27,14 +27,14 @@ class ColorSquare(Shader):
             gloo.Program(
                 vertex="""
                 uniform float scale;
+                uniform vec4 u_color;
                 attribute vec2 position;
-                attribute vec4 color;
-                varying vec4 v_color;
+                attribute vec4 v_color;
 
                 void main()
                 {
                     gl_Position = vec4(scale*position, 0.0, 1.0);
-                    v_color = color;
+                    v_color = u_color;
                 } 
                 """,
                 fragment="""
@@ -127,10 +127,11 @@ class Perspective(Shader):
         self.load_vertex_buffers(t)
         self.index_buffer = self.indices(t).view(gloo.IndexBuffer)
         self.program.bind(self.vertex_buffer)
-        
+
         self.program['u_model'] = self.model(t)
         self.program['u_view'] = self.view(t)
         self.program['u_projection'] = self.projection(t)
+        self.program['u_color'] = [0, 1, 1, 1]
 
         return super().__call__(surface, t)
 
@@ -139,20 +140,19 @@ class Perspective(Shader):
     
     def load_vertex_buffers(self, t):
         self.vertex_buffer['a_position'] = self.positions(t)
-        
-        
 
-class WireframePerspective(Perspective):
-    def __init__(self, wireframe, *args, **kwargs):
-        self.wireframe = wireframe
+
+class MeshPerspective(Perspective):
+    def __init__(self, mesh, *args, **kwargs):
+        self.mesh = mesh
         positions = np.array(
-            self.wireframe.mesh.points
+            self.mesh.points
         ).astype(np.float32).reshape((-1, 3))
         super().__init__(
             vertex_count=positions.shape[0],
             positions=positions,
             indices=np.array(
-                self.wireframe.mesh.elements
+                self.mesh.faces
             ).astype(np.uint32).reshape((-1,)),
             *args, **kwargs
         )
@@ -163,11 +163,11 @@ class WireframePerspective(Perspective):
 
         gl.glDepthMask(gl.GL_FALSE)
         self.program['u_color'] = [1, 0, 1, 1]
-        gl.glPointSize(2.0)        
+        gl.glPointSize(3.0)
         self.program.draw(gl.GL_POINTS)
         self.program.draw(
-            gl.GL_LINES,
-            np.array(self.wireframe.mesh.edges).reshape((-1,))
+            gl.GL_LINE_STRIP,
+            np.array(self.mesh.edges).reshape((-1,))
         )
         gl.glDepthMask(gl.GL_TRUE)
 
