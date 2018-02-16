@@ -1,22 +1,16 @@
 from functools import reduce
 
 import numpy as np
-from glumpy import glm, gloo
+from glumpy import glm
 
 from pipeline.Pipeline import Pipeline
-from pipeline.sprite.wireframe import (
-    SphereWireframe,
-    BoxWireframe,
-)
-from pipeline.sprite.mesh import CubeMesh
+from pipeline.sprite.mesh import BoxMesh
 from pipeline.synthesis.opengl.prelude import (
     Clear,
     Rotation,
 )
-from pipeline.synthesis.opengl.shader import (
-    MeshPerspective,
-    ColorSquare,
-)
+from pipeline.synthesis.opengl.test import ColorSquare
+from pipeline.synthesis.opengl.mesh import MeshPerspective
 from pipeline.synthesis.pattern import (
     AnimatedColorMap,
     UniformColorMap,
@@ -40,7 +34,7 @@ class OpenGLPipeline(Pipeline):
          
             Clear(),
             MeshPerspective(
-                mesh=CubeMesh(),
+                mesh=BoxMesh(),
                 projection=glm.perspective(45., w / h, 2., 100.),
                 model=Rotation(
                     angle=lambda t: (5*t, 0, 10*t),

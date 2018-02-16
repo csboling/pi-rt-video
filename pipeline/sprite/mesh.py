@@ -22,18 +22,18 @@ class Mesh(metaclass=ABCMeta):
         pass
 
 
-class CubeMesh(Mesh):
-    def __init__(self):
+class BoxMesh(Mesh):
+    def __init__(self, width=1., height=1., depth=1.):
         self._points = np.array([
-            [ 1., 1., 1.],
-            [-1., 1., 1.],
-            [-1.,-1., 1.],
-            [ 1.,-1., 1.],
-               
-            [ 1.,-1.,-1.],
-            [ 1., 1.,-1.],
-            [-1., 1.,-1.],
-            [-1.,-1.,-1.],
+            [ width / 2, height / 2, depth / 2],
+            [-width / 2, height / 2, depth / 2],
+            [-width / 2,-height / 2, depth / 2],
+            [ width / 2,-height / 2, depth / 2],
+
+            [ width / 2,-height / 2,-depth / 2],
+            [ width / 2, height / 2,-depth / 2],
+            [-width / 2, height / 2,-depth / 2],
+            [-width / 2,-height / 2,-depth / 2],
         ]) / 2
         self._edges = [
             [0, 1, 2, 3, 0],
