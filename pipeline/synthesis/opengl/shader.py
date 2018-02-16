@@ -165,10 +165,11 @@ class MeshPerspective(Perspective):
         self.program['u_color'] = [1, 0, 1, 1]
         gl.glPointSize(3.0)
         self.program.draw(gl.GL_POINTS)
-        self.program.draw(
-            gl.GL_LINE_STRIP,
-            np.array(self.mesh.edges).reshape((-1,))
-        )
+        for edge_row in self.mesh.edges:
+            self.program.draw(gl.GL_LINE_STRIP, self.as_index_buffer(edge_row))
         gl.glDepthMask(gl.GL_TRUE)
 
+    @staticmethod
+    def as_index_buffer(points):
+        return np.array(points).astype(np.uint32).view(gloo.IndexBuffer)
         
