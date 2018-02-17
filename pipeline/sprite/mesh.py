@@ -23,17 +23,21 @@ class Mesh(metaclass=ABCMeta):
 
 
 class BoxMesh(Mesh):
-    def __init__(self, width=1., height=1., depth=1.):
+    def __init__(self, width=1., height=None, depth=None):
+        if height is None:
+            height = width
+        if depth is None:
+            depth = width
         self._points = np.array([
-            [ width / 2, height / 2, depth / 2],
-            [-width / 2, height / 2, depth / 2],
-            [-width / 2,-height / 2, depth / 2],
-            [ width / 2,-height / 2, depth / 2],
+            [ width,  height,  depth],
+            [-width,  height,  depth],
+            [-width, -height,  depth],
+            [ width, -height,  depth],
 
-            [ width / 2,-height / 2,-depth / 2],
-            [ width / 2, height / 2,-depth / 2],
-            [-width / 2, height / 2,-depth / 2],
-            [-width / 2,-height / 2,-depth / 2],
+            [ width, -height, -depth],
+            [ width,  height, -depth],
+            [-width,  height, -depth],
+            [-width, -height, -depth],
         ]) / 2
         self._edges = [
             [0, 1, 2, 3, 0],

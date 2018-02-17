@@ -16,8 +16,7 @@ class MeshPerspective(Perspective):
             *args, **kwargs
         )
 
-    def draw(self, t):
-        
+    def draw(self, t):       
         self.program['u_color'] = [0, 1, 1, 1]
         self.program.draw(
             gl.GL_TRIANGLE_STRIP,

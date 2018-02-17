@@ -10,7 +10,7 @@ from pipeline.synthesis.opengl.prelude import (
     Rotation,
 )
 from pipeline.synthesis.opengl.test import ColorSquare
-from pipeline.synthesis.opengl.mesh import MeshPerspective
+from pipeline.synthesis.opengl.perspective import ColorPerspective
 from pipeline.synthesis.pattern import (
     AnimatedColorMap,
     UniformColorMap,
@@ -33,8 +33,9 @@ class OpenGLPipeline(Pipeline):
             source,
          
             Clear(),
-            MeshPerspective(
+            ColorPerspective(
                 mesh=BoxMesh(),
+                color=[1, 1, 0, 1],
                 projection=glm.perspective(45., w / h, 2., 100.),
                 model=Rotation(
                     angle=lambda t: (5*t, 0, 10*t),
