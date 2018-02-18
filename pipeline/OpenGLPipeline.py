@@ -10,7 +10,11 @@ from pipeline.synthesis.opengl.prelude import (
     Rotation,
 )
 from pipeline.synthesis.opengl.test import ColorSquare
-from pipeline.synthesis.opengl.perspective import ColorPerspective
+from pipeline.synthesis.opengl.perspective import (
+    # ColorPerspective,
+    UniformColorPerspective,
+    MultiColorPerspective,
+)
 from pipeline.synthesis.pattern import (
     AnimatedColorMap,
     UniformColorMap,
@@ -25,7 +29,7 @@ class OpenGLPipeline(Pipeline):
 
     def __init__(self):
         source = VideoSynthesisSource(
-            framerate=24, resolution=(320, 240)
+            framerate=24, resolution=(640, 480)
         )
         w, h = source.resolution
 
@@ -33,9 +37,20 @@ class OpenGLPipeline(Pipeline):
             source,
          
             Clear(),
-            ColorPerspective(
+            UniformColorPerspective(
                 mesh=BoxMesh(),
-                color=[1, 1, 0, 1],
+                color=[
+                    0, 1, 1, 1
+                    # [0, 0, 0, 1],
+                    # [0, 0, 1, 1],
+                    # [0, 1, 0, 1],
+                    # [0, 1, 1, 1],
+                    
+                    # [1, 0, 0, 1],
+                    # [1, 0, 1, 1],
+                    # [1, 1, 0, 1],
+                    # [1, 1, 1, 1],
+                ],
                 projection=glm.perspective(45., w / h, 2., 100.),
                 model=Rotation(
                     angle=lambda t: (5*t, 0, 10*t),

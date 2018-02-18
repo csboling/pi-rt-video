@@ -32,7 +32,6 @@ class Snippet(gloo.Snippet):
         return code
 
 
-
 class SnippetProgram(gloo.Program):
     def __init__(self, vertex, fragment, *args, **kwargs):
         if isinstance(vertex, Snippet):
@@ -46,8 +45,10 @@ class SnippetProgram(gloo.Program):
 
         vertex_code = self.finalize_snippet(self.vertex_snippet)
         self.list_shader('vertex:', vertex_code)
+        print('==================================')
         fragment_code = self.finalize_snippet(self.fragment_snippet)
         self.list_shader('fragment:', fragment_code)
+        
         super().__init__(
             vertex=vertex_code,
             fragment=fragment_code,
@@ -58,7 +59,7 @@ class SnippetProgram(gloo.Program):
     def list_shader(name, code):
         print(name)
         for line in code.split('\n'):
-            print(line)
+            print(line.lstrip())
             
     @staticmethod
     def finalize_snippet(snippet):

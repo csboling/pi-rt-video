@@ -62,43 +62,66 @@ class Perspective(Shader):
                 
 
 class ColorPerspective(Perspective):
-    @params(color=None)
-    def __init__(self, mesh, color, *args, **kwargs):
+    def __init__(self,
+                 mesh,
+                 color_vertex, color_fragment,
+                 *args, **kwargs):
         self.mesh = mesh
-        position = np.array(
-            self.mesh.points
-        ).astype(np.float32).reshape((-1, 3))
 
         super().__init__(
             vertex=Snippet(
-                '''
-                uniform vec4 u_color;
-                varying vec4 v_color;
-                
-                void draw_projection(in vec4 pos)
-                {
-                    gl_Position = pos;
-                    v_color = u_color;
-                }
-                ''',
-                preserve_names=['v_color']
-            ),
-            fragment=Snippet(
+                color_vertex
+                +
                 '''
                 varying vec4 v_color;
 
-                void color_fragments()
+                void draw_projection(in vec4 pos)
                 {
-                    gl_FragColor = v_color;
+                    gl_Position = pos;
+                    v_color = color_vertex(pos);
                 }
                 ''',
+                call='draw_projection',
                 preserve_names=['v_color']
             ),
-            position=position,
-            vertex_count=position.shape[0],
-            uniforms={
-                'u_color': color,
-            },
+            fragment=Snippet(
+                color_fragment
+                +
+                '''
+                varying vec4 v_color;
+
+                void apply_colors()
+                {
+                    gl_FragColor = color_fragment(v_color);
+                }
+                ''',
+                call='apply_colors',
+                preserve_names=['v_color']
+            ),
+            position=self.mesh.points,
+            vertex_count=len(self.mesh.points),
+            *args, **kwargs
+        )
+
+class UniformColorPerspective(ColorPerspective):
+    @params(color=None)
+    def __init__(self, mesh, color, *args, **kwargs):
+        super().__init__(
+            mesh=mesh,
+            color_vertex='''
+            uniform vec4 u_color;
+
+            vec4 color_vertex(vec4 pos)
+            {
+                return u_color;
+            }
+            ''',
+            color_fragment='''
+            vec4 color_fragment(vec4 vertex_color)
+            {
+                return vertex_color;
+            }
+            ''',
             *args, **kwargs
         )
 
@@ -120,3 +143,58 @@ class ColorPerspective(Perspective):
             )
         gl.glDepthMask(gl.GL_TRUE)
 
+
+class MultiColorPerspective(Perspective):
+    @params(color=None)
+    def __init__(self, mesh, color, *args, **kwargs):
+        self.mesh = mesh
+
+        super().__init__(
+            vertex=Snippet(
+                '''
+                attribute vec4 a_color;
+                varying vec4 v_color;
+
+                void draw_projection(in vec4 pos)
+                {
+                    gl_Position = pos;
+                    v_color = a_color;
+                }
+                ''',
+                preserve_names=['v_color']
+            ),
+            fragment=Snippet(
+                '''
+                varying vec4 v_color;
+                
+                void color_fragments()
+                {
+                    gl_FragColor = v_color;
+                }
+                ''',
+                preserve_names=['v_color']
+            ),
+            position=self.mesh.points,
+            vertex_count=len(self.mesh.points),
+            attributes={
+                'a_color': (4, color),
+            },
+            *args, **kwargs
+        )
+       
+    def draw(self, t):
+        self.program.draw(
+            gl.GL_TRIANGLE_STRIP,
+            self.as_index_buffer(self.mesh.faces)
+        )
+        
+        gl.glDepthMask(gl.GL_FALSE)
+        # self.program['u_color'] = [1, 0, 1, 1]
+        gl.glPointSize(3.0)
+        self.program.draw(gl.GL_POINTS)
+        for edge_row in self.mesh.edges:
+            self.program.draw(
+                gl.GL_LINE_STRIP,
+                self.as_index_buffer(edge_row)
+            )
+        gl.glDepthMask(gl.GL_TRUE)
