@@ -4,17 +4,19 @@ import numpy as np
 from glumpy import glm
 
 from pipeline.Pipeline import Pipeline
-from pipeline.sprite.mesh import BoxMesh
+from pipeline.sprite.mesh import (
+    BoxMesh,
+    SphereMesh,
+)
 from pipeline.synthesis.opengl.prelude import (
     Clear,
     Rotation,
 )
-from pipeline.synthesis.opengl.test import ColorSquare
-from pipeline.synthesis.opengl.perspective import (
-    # ColorPerspective,
-    UniformColorPerspective,
+from pipeline.synthesis.opengl.perspective.color import (
     MultiColorPerspective,
+    AnimatedColorPerspective,
 )
+from pipeline.synthesis.opengl.perspective.wireframe import WireframePerspective
 from pipeline.synthesis.pattern import (
     AnimatedColorMap,
     UniformColorMap,
@@ -29,7 +31,7 @@ class OpenGLPipeline(Pipeline):
 
     def __init__(self):
         source = VideoSynthesisSource(
-            framerate=24, resolution=(640, 480)
+            framerate=24, resolution=(320, 240)
         )
         w, h = source.resolution
 
@@ -37,19 +39,8 @@ class OpenGLPipeline(Pipeline):
             source,
          
             Clear(),
-            MultiColorPerspective(
-                mesh=BoxMesh(),
-                color=[
-                    [0, 0, 0, 1],
-                    [0, 0, 1, 1],
-                    [0, 1, 0, 1],
-                    [0, 1, 1, 1],
-                    
-                    [1, 0, 0, 1],
-                    [1, 0, 1, 1],
-                    [1, 1, 0, 1],
-                    [1, 1, 1, 1],
-                ],
+            WireframePerspective(
+                mesh=SphereMesh(),
                 projection=glm.perspective(45., w / h, 2., 100.),
                 model=Rotation(
                     angle=lambda t: (5*t, 0, 10*t),

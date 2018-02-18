@@ -13,8 +13,8 @@ class PygameSink(Sink):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    quit()
-
+                    return
+                    
             self.process(item)
             
     def process(self, item):
