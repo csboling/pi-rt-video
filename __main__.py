@@ -3,7 +3,7 @@
 from pipeline.OpenGLPipeline import OpenGLPipeline
 
 
-reload_on_save = False
+reload_on_save = True
 trace_leaks = False
 
 tracker = None

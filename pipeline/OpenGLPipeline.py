@@ -41,10 +41,14 @@ class OpenGLPipeline(Pipeline):
             source,
          
             Clear(),
-            AnimatedColorPerspective(
-                mesh=MoebiusMesh(nl=35, nw=7),
+            MultiColorPerspective(
+                mesh=BoxMesh(),
+                color=[
+                    [0, 1, 1, 1], [0, 0, 1, 1], [0, 0, 0, 1], [0, 1, 0, 1],
+                    [1, 1, 0, 1], [1, 1, 1, 1], [1, 0, 1, 1], [1, 0, 0, 1],
+                
+                ],
                 projection=glm.perspective(45., w / h, 2., 100.),
-                view=translation_matrix((0, 0, -40)),
                 model=Rotation(
                     angle=lambda t: (20*t, 20*t, 20*t),
                     matrix=lambda t: np.eye(4)

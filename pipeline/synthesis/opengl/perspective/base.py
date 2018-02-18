@@ -57,5 +57,10 @@ class Perspective(Shader):
             *args, **kwargs
         )
 
-    def gl_setup(self):
+    def gl_setup(self, t):
+        super().gl_setup(t)
         gl.glEnable(gl.GL_DEPTH_TEST)
+
+    def gl_teardown(self, t):
+        gl.glDisable(gl.GL_DEPTH_TEST)
+        super().gl_teardown(t)

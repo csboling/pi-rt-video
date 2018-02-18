@@ -119,7 +119,9 @@ class Shader(OpenGLProcessor):
         
     def __call__(self, surface, t):
         self.load_buffers(t)
+        self.gl_setup(t)
         self.draw(t)
+        self.gl_teardown(t)
 
     def load_buffers(self, t):
         for name, func in self.attributes.items():
@@ -132,6 +134,12 @@ class Shader(OpenGLProcessor):
         for name, func in self.uniforms.items():
             self.program[name] = func(t)
 
+    def gl_setup(self, t):
+        pass
+
+    def gl_teardown(self, t):
+        pass
+            
     @abstractmethod
     def draw(self, t):
         pass
