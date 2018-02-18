@@ -144,38 +144,25 @@ class UniformColorPerspective(ColorPerspective):
         gl.glDepthMask(gl.GL_TRUE)
 
 
-class MultiColorPerspective(Perspective):
+class MultiColorPerspective(ColorPerspective):
     @params(color=None)
     def __init__(self, mesh, color, *args, **kwargs):
-        self.mesh = mesh
-
         super().__init__(
-            vertex=Snippet(
-                '''
-                attribute vec4 a_color;
-                varying vec4 v_color;
+            mesh=mesh,
+            color_vertex='''
+            attribute vec4 a_color;
 
-                void draw_projection(in vec4 pos)
-                {
-                    gl_Position = pos;
-                    v_color = a_color;
-                }
-                ''',
-                preserve_names=['v_color']
-            ),
-            fragment=Snippet(
-                '''
-                varying vec4 v_color;
-                
-                void color_fragments()
-                {
-                    gl_FragColor = v_color;
-                }
-                ''',
-                preserve_names=['v_color']
-            ),
-            position=self.mesh.points,
-            vertex_count=len(self.mesh.points),
+            vec4 color_vertex(vec4 pos)
+            {
+                return a_color;
+            }
+            ''',
+            color_fragment='''
+            vec4 color_fragment(vec4 vertex_color)
+            {
+                return vertex_color;
+            }
+            ''',
             attributes={
                 'a_color': (4, color),
             },
@@ -189,7 +176,6 @@ class MultiColorPerspective(Perspective):
         )
         
         gl.glDepthMask(gl.GL_FALSE)
-        # self.program['u_color'] = [1, 0, 1, 1]
         gl.glPointSize(3.0)
         self.program.draw(gl.GL_POINTS)
         for edge_row in self.mesh.edges:

@@ -37,19 +37,18 @@ class OpenGLPipeline(Pipeline):
             source,
          
             Clear(),
-            UniformColorPerspective(
+            MultiColorPerspective(
                 mesh=BoxMesh(),
                 color=[
-                    0, 1, 1, 1
-                    # [0, 0, 0, 1],
-                    # [0, 0, 1, 1],
-                    # [0, 1, 0, 1],
-                    # [0, 1, 1, 1],
+                    [0, 0, 0, 1],
+                    [0, 0, 1, 1],
+                    [0, 1, 0, 1],
+                    [0, 1, 1, 1],
                     
-                    # [1, 0, 0, 1],
-                    # [1, 0, 1, 1],
-                    # [1, 1, 0, 1],
-                    # [1, 1, 1, 1],
+                    [1, 0, 0, 1],
+                    [1, 0, 1, 1],
+                    [1, 1, 0, 1],
+                    [1, 1, 1, 1],
                 ],
                 projection=glm.perspective(45., w / h, 2., 100.),
                 model=Rotation(
