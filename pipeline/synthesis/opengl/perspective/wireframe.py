@@ -13,12 +13,14 @@ class WireframePerspective(UniformColorPerspective):
         )
     
     def draw(self, t):
-        gl.glDepthMask(gl.GL_FALSE)
+        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE)
+
+        self.program.draw(
+            gl.GL_TRIANGLES,
+            self.as_index_buffer(self.mesh.faces)
+        )
         gl.glPointSize(3.0)
         self.program.draw(gl.GL_POINTS)
-        for edge_row in self.mesh.edges:
-            self.program.draw(
-                gl.GL_LINE_STRIP,
-                self.as_index_buffer(edge_row)
-            )
-        gl.glDepthMask(gl.GL_TRUE)
+
+        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL)
+

@@ -6,8 +6,10 @@ from glumpy import glm
 from pipeline.Pipeline import Pipeline
 from pipeline.sprite.mesh import (
     BoxMesh,
-    SphereMesh,
+    IcosphereMesh,
+    MoebiusMesh,
 )
+from pipeline.synthesis.geometry import translation_matrix
 from pipeline.synthesis.opengl.prelude import (
     Clear,
     Rotation,
@@ -39,11 +41,12 @@ class OpenGLPipeline(Pipeline):
             source,
          
             Clear(),
-            WireframePerspective(
-                mesh=SphereMesh(),
+            AnimatedColorPerspective(
+                mesh=MoebiusMesh(nl=45),
                 projection=glm.perspective(45., w / h, 2., 100.),
+                view=translation_matrix((0, 0, -35)),
                 model=Rotation(
-                    angle=lambda t: (5*t, 0, 10*t),
+                    angle=lambda t: (20*t, 20*t, 20*t),
                     matrix=lambda t: np.eye(4)
                 )
             ),

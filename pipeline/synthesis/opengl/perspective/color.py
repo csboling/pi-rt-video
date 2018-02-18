@@ -102,19 +102,9 @@ class MultiColorPerspective(ColorPerspective):
        
     def draw(self, t):
         self.program.draw(
-            gl.GL_TRIANGLE_STRIP,
+            gl.GL_TRIANGLES,
             self.as_index_buffer(self.mesh.faces)
         )
-        
-        gl.glDepthMask(gl.GL_FALSE)
-        gl.glPointSize(3.0)
-        self.program.draw(gl.GL_POINTS)
-        for edge_row in self.mesh.edges:
-            self.program.draw(
-                gl.GL_LINE_STRIP,
-                self.as_index_buffer(edge_row)
-            )
-        gl.glDepthMask(gl.GL_TRUE)
 
 
 class AnimatedColorPerspective(ColorPerspective):
@@ -130,15 +120,15 @@ class AnimatedColorPerspective(ColorPerspective):
                 float y = pos[1];
                 float z = pos[2];
                 return vec4(
-                    sin(
-                        exp(1.5*cos(u_time)) * x * y
-                    ),
-                    cos(
-                        exp(1.5*sin(u_time)) * x
-                    ),
-                    sin(
-                        exp(1.5*sin(u_time)) * y
-                    ),
+                    0.5*(1 + sin(
+                        exp(5*cos(u_time)) * x * y / 7.0
+                    )),
+                    0.5*(1 + cos(
+                        exp(3*sin(u_time)) * x / 11.0
+                    )),
+                    0.5*(1 + sin(
+                        exp(2*sin(u_time)) * y / 16.0
+                    )),
                     1.0
                 );
             }
@@ -156,17 +146,22 @@ class AnimatedColorPerspective(ColorPerspective):
         )
 
     def draw(self, t):
+        split_pt = len(self.mesh.faces) // 2
+        wireframe = self.mesh.faces[:split_pt]
+        filled = self.mesh.faces[split_pt:]
+
+        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE)
+
         self.program.draw(
-            gl.GL_TRIANGLE_STRIP,
+            gl.GL_TRIANGLES,
             self.as_index_buffer(self.mesh.faces)
         )
-        
-        # gl.glDepthMask(gl.GL_FALSE)
-        # gl.glPointSize(3.0)
-        # self.program.draw(gl.GL_POINTS)
-        # for edge_row in self.mesh.edges:
-        #     self.program.draw(
-        #         gl.GL_LINE_STRIP,
-        #         self.as_index_buffer(edge_row)
-        #     )
-        # gl.glDepthMask(gl.GL_TRUE)
+        gl.glPointSize(3.0)
+        self.program.draw(gl.GL_POINTS)
+
+        gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_FILL)
+       
+        self.program.draw(
+            gl.GL_TRIANGLE_STRIP,
+            self.as_index_buffer(filled)
+        )
