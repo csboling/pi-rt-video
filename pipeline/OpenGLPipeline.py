@@ -33,7 +33,7 @@ class OpenGLPipeline(Pipeline):
 
     def __init__(self):
         source = VideoSynthesisSource(
-            framerate=24, resolution=(320, 240)
+            framerate=24, # resolution=(320, 240)
         )
         w, h = source.resolution
 
@@ -42,9 +42,9 @@ class OpenGLPipeline(Pipeline):
          
             Clear(),
             AnimatedColorPerspective(
-                mesh=MoebiusMesh(nl=45),
+                mesh=MoebiusMesh(nl=35, nw=7),
                 projection=glm.perspective(45., w / h, 2., 100.),
-                view=translation_matrix((0, 0, -35)),
+                view=translation_matrix((0, 0, -40)),
                 model=Rotation(
                     angle=lambda t: (20*t, 20*t, 20*t),
                     matrix=lambda t: np.eye(4)

@@ -121,13 +121,16 @@ class AnimatedColorPerspective(ColorPerspective):
                 float z = pos[2];
                 return vec4(
                     0.5*(1 + sin(
-                        exp(5*cos(u_time)) * x * y / 7.0
+        //                exp(5*cos(u_time)) * x * y / 7.0
+x*y*u_time/12
                     )),
                     0.5*(1 + cos(
-                        exp(3*sin(u_time)) * x / 11.0
+x*u_time/36
+//                        exp(3*sin(u_time)) * x / 11.0
                     )),
                     0.5*(1 + sin(
-                        exp(2*sin(u_time)) * y / 16.0
+y*u_time/24
+ //                       exp(2*sin(u_time)) * y / 16.0
                     )),
                     1.0
                 );
