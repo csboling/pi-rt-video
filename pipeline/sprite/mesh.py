@@ -85,15 +85,7 @@ class BoxMesh(Mesh):
         
         super().__init__(
             points=positions[face_indices],
-            faces=filled,# [
-            #     0,1,2, 0,2,3,
-            #     0,3,4, 0,4,5,
-            #     0,5,6, 0,6,1,
-
-            #     1,6,7, 1,7,2,
-            #     7,4,3, 7,3,2,
-            #     4,7,6, 4,6,5,
-            # ],
+            faces=filled,
             texcoord=texture_coords[texture_indices]
         )
 
@@ -106,5 +98,15 @@ class MoebiusMesh(Mesh):
 class IcosphereMesh(Mesh):
     def __init__(self, *args, **kwargs):
         points, faces = meshzoo.iso_sphere(*args, **kwargs)
-        self._points = points
-        self._faces = faces
+        super().__init__(
+            points=points,
+            faces=faces,
+            texcoord=self.calculate_uv(points),
+        )
+
+    def calculate_uv(self, points):
+        d = (-points.T / np.linalg.norm(points, axis=-1)).T
+        return np.stack((
+            0.5 + d[:, 1]*0.5,
+            0.5 + np.arctan2(d[:, 0], d[:, 2]) / (2*np.pi),
+        ), axis=-1)
