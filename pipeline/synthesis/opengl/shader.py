@@ -81,6 +81,7 @@ class SnippetProgram(gloo.Program):
                 return snippet.symbols[key]
             except KeyError:
                 continue
+        raise KeyError
         
     def __getitem__(self, key):
         return super().__getitem__(self.mangle_key(key))

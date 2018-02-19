@@ -18,9 +18,11 @@ from pipeline.synthesis.opengl.perspective.color import (
     MultiColorPerspective,
     AnimatedColorPerspective,
 )
+from pipeline.synthesis.opengl.perspective.texture import TexturePerspective
 from pipeline.synthesis.opengl.perspective.wireframe import WireframePerspective
 from pipeline.synthesis.pattern import (
     AnimatedColorMap,
+    Checkerboard,
     UniformColorMap,
     WeirdSineColorMap,
 )
@@ -41,13 +43,18 @@ class OpenGLPipeline(Pipeline):
             source,
          
             Clear(),
-            MultiColorPerspective(
+            TexturePerspective(
                 mesh=BoxMesh(),
-                color=[
+                color=np.array([
                     [0, 1, 1, 1], [0, 0, 1, 1], [0, 0, 0, 1], [0, 1, 0, 1],
                     [1, 1, 0, 1], [1, 1, 1, 1], [1, 0, 1, 1], [1, 0, 0, 1],
-                
+                ])[
+                    [
+                        0, 1, 2, 3,  0, 3, 4, 5,   0, 5, 6, 1,
+                        1, 6, 7, 2,  7, 4, 3, 2,   4, 7, 6, 5,
+                    ]
                 ],
+                texture=Checkerboard(),
                 projection=glm.perspective(45., w / h, 2., 100.),
                 model=Rotation(
                     angle=lambda t: (20*t, 20*t, 20*t),

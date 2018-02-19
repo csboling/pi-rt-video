@@ -9,6 +9,7 @@ class ColorPerspective(Perspective):
     def __init__(self,
                  mesh,
                  color_vertex, color_fragment,
+                 preserve_names=tuple(),
                  *args, **kwargs):
         self.mesh = mesh
 
@@ -26,7 +27,7 @@ class ColorPerspective(Perspective):
                 }
                 ''',
                 call='draw_projection',
-                preserve_names=['v_color']
+                preserve_names=['v_color', *preserve_names]
             ),
             fragment=Snippet(
                 color_fragment
@@ -40,7 +41,7 @@ class ColorPerspective(Perspective):
                 }
                 ''',
                 call='apply_colors',
-                preserve_names=['v_color']
+                preserve_names=['v_color', *preserve_names]
             ),
             position=self.mesh.points,
             vertex_count=len(self.mesh.points),
