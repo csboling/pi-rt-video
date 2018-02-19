@@ -87,7 +87,12 @@ class Checkerboard:
         return 255 * Z.repeat(grid_size, axis=0).repeat(grid_size, axis=1)
         
     def __call__(self, t):
-        return self.checks()
+        checks = self.checks()
+        offset = (
+            int(128 + 127*np.cos(2*np.pi*t / 8)),
+            int(128 + 127*np.sin(3*np.pi*t / 8)),
+        )
+        return np.roll(checks, offset)
             
 
 # class Checkerboard:
