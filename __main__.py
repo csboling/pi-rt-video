@@ -1,7 +1,6 @@
 # from pipeline.VideoProcessingPipeline import VideoProcessingPipeline
 # from pipeline.VideoSynthesisPipeline import VideoSynthesisPipeline
-# from pipeline.OpenGLPipeline import OpenGLPipeline
-from pipeline.pipelines.vaporsphere import Vaporsphere
+from pipeline.OpenGLPipeline import OpenGLPipeline
 
 
 reload_on_save = True
@@ -14,8 +13,7 @@ if trace_leaks:
 
 # p = VideoProcessingPipeline()
 # p = VideoSynthesisPipeline()
-# p = OpenGLPipeline()
-p = Vaporsphere()
+p = OpenGLPipeline()
 
 if reload_on_save:
     from werkzeug.serving import run_with_reloader

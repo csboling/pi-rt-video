@@ -50,6 +50,24 @@ class Pen(Processor):
             yield surface
 
 
+class TimeFuncPen:
+    def __init__(self, resolution, animation, colors, points=20, fill=(0, 0, 0, 0)):
+        self.resolution = resolution
+        self.animation = animation
+        self.color = parse_color(colors, points)
+        self.prev_pos = None
+        self.surface = pygame.Surface(self.resolution)
+    
+    def __call__(self, t):
+        w, h = self.resolution
+        pos = self.animation.get_xy((w, h), self.surface, t)
+        color = self.color(pos, w, h, t)
+        if self.prev_pos is not None:
+            pygame.draw.aaline(self.surface, color, self.prev_pos, pos)
+        self.prev_pos = pos
+        return self.surface
+    
+
 class Circle(Sprite):
     def __init__(self, radius, color):
         self.radius = radius

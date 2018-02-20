@@ -13,7 +13,7 @@ def rgb_to_frame(r, g, b):
 class AnimatedColorMap:
     def __init__(self, r, g, b):
         self.r, self.g, self.b = r, g, b
-
+        
     def __call__(self, shape, t):
         w, h = shape
         x, y = (
@@ -47,17 +47,18 @@ class UniformColorMap(AnimatedColorMap):
 
 class WeirdSineColorMap(AnimatedColorMap):
     def __init__(self):
+        freqdiv = 2
         super().__init__( 
             r=lambda x, y, t: np.sin(
-                np.exp(1.5*np.sin(t))
+                np.exp(1.5*np.sin(t  / freqdiv)) / freqdiv
                 *
                 np.outer(x,y)*y
             ),
             g=lambda x, y, t: np.cos(
-                np.exp(1.5*np.cos(t))*y
+                np.exp(1.5*np.cos(t / freqdiv))*y  / freqdiv
             )*np.cos(np.outer(x,y)),
             b=lambda x, y, t: np.cos(
-                np.exp(1.5*np.cos(t)*np.sin(t))
+                np.exp(1.5*np.cos(t  / freqdiv)*np.sin(t  / freqdiv))  / freqdiv
                 *
                 np.outer(x,y)
                 +
@@ -93,30 +94,17 @@ class Checkerboard:
             int(128 + 127*np.sin(3*np.pi*t / 8)),
         )
         return np.roll(checks, offset)
-            
 
-# class Checkerboard:
-#     @params(
-#         bit_pattern=[
-#             [1, 0, 1, 0],
-#             [0, 1, 0, 1],
-#             [1, 0, 1, 0],
-#             [0, 1, 0, 1],
-#         ],
-#         offset=(0, 0),
-#     )
-#     def __init__(self, dims, bit_pattern, offset):
-#         self.dims = dims
-#         self.bit_pattern = bit_pattern
-#         self.offset = offset
 
-#     def __call__(self, t):
-#         w, h = self.dims
-#         bit_pattern = np.array(self.bit_pattern(t), dtype=np.bool)
-#         offset = self.offset(t)
-
-#         check_w = w // bit_pattern.shape[0]
-#         check_h = h // bit_pattern.shape[1]
-#         checks = np.zeros((*bit_pattern.shape, check_w, check_h, 4))
-#         checks[bit_pattern] = (0, 0, 0, 4)
-#         return np.roll(checks.reshape((w, h, 4)), offset)
+class Constant:
+    def __init__(self):
+        top = np.zeros((128, 256, 4))
+        bottom = np.zeros((128, 256, 4))
+        top[..., :] = [255, 255, 0, 255]
+        bottom[..., :] = [0, 255, 0, 255]
+        xs = WeirdSineColorMap()((256, 256), 0)
+        import pdb; pdb.set_trace()
+        self.constant = 255 * np.vstack([top, bottom])
+    
+    def __call__(self, t):
+        return self.constant

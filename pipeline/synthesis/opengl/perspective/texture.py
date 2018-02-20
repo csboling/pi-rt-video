@@ -29,8 +29,9 @@ class TexturePerspective(ColorPerspective):
 
             vec4 color_fragment(vec4 vertex_color)
             {
-                vec4 t_color = vec4(vec3(texture2D(u_texture, v_texcoord).r), 1.0);
-                return t_color * mix(vertex_color, t_color, 0.25);
+                return texture2D(u_texture, v_texcoord).rgba;
+                // vec4 t_color = vec4(vec3(texture2D(u_texture, v_texcoord).r), 1.0);
+                // return t_color * mix(vertex_color, t_color, 0.25);
             }
             ''',
             preserve_names=['v_texcoord'],
@@ -39,7 +40,7 @@ class TexturePerspective(ColorPerspective):
                 'a_texcoord': (2, self.mesh.texcoord),
             },
             uniforms={
-                'u_texture': texture,
+                'u_texture': lambda t: np.ascontiguousarray(texture(t)),
             },
             *args, **kwargs
         )    
