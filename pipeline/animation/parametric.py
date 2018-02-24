@@ -36,8 +36,8 @@ class Parametric2DMotion(Animation):
 class Harmonograph(Parametric2DMotion):
     def __init__(self, x_terms, y_terms, *args, **kwargs):
         super().__init__(
-            lambda t: sum(self.term(np.cos, *params, t) for params in x_terms),
-            lambda t: sum(self.term(np.sin, *params, t) for params in x_terms),
+            lambda t: sum(self.term(np.cos, **params, t=t) for params in x_terms),
+            lambda t: sum(self.term(np.sin, **params, t=t) for params in y_terms),
             *args, **kwargs
         )
 
@@ -54,7 +54,7 @@ class Hypocycloid(Parametric2DMotion):
                 (a(t) + b(t))*np.cos(t) 
                 + 
                 b(t)*np.cos(
-                    (a(t) + b(t)) / _b(t) * t
+                    (a(t) + b(t)) / b(t) * t
                 )
             ),
             lambda t: Y(t) * (
@@ -73,8 +73,8 @@ class LissajousCurve(Parametric2DMotion):
     @params(X=None, Y=None, a=1, b=1, delta=np.pi/2)
     def __init__(self, X, Y, a, b, delta, *args, **kwargs): 
         super().__init__(
-            lambda t: X(t) * np.sin(a(t)*t + delta),
-            lambda t: Y(t) * np.sin(b(t)*t),
+            lambda t: X(t) * np.sin(a(t)*t / 4 + delta(t)),
+            lambda t: Y(t) * np.sin(b(t)*t / 4),
             *args, **kwargs
         )
 
@@ -97,5 +97,25 @@ class RoseCurve(Parametric2DMotion):
         super().__init__(
             lambda t: X(t) * np.cos(k(t)*t) * np.cos(t),  
             lambda t: Y(t) * np.cos(k(t)*t) * np.sin(t),
+            *args, **kwargs
+        )
+
+class ButterflyCurve(Parametric2DMotion):
+
+    @params(X=None, Y=None, a=4, b=12)
+    def __init__(self, X, Y, a, b, *args, **kwargs):
+        super().__init__(
+            lambda t: X(t) * np.sin(t) * (
+                np.exp(np.cos(t))
+                -
+                2*np.cos(a(t) * t)
+                - (np.sin(t / b(t)))**5
+            ),
+            lambda t: Y(t) * np.cos(t) * (
+                np.exp(np.cos(t))
+                -
+                2*np.cos(a(t) * t)
+                - (np.sin(t / b(t)))**5
+            ),
             *args, **kwargs
         )
