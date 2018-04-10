@@ -9,6 +9,7 @@ class ColorPerspective(Perspective):
     def __init__(self,
                  mesh,
                  color_vertex, color_fragment,
+                 preserve_names=tuple(),
                  *args, **kwargs):
         self.mesh = mesh
 
@@ -26,7 +27,7 @@ class ColorPerspective(Perspective):
                 }
                 ''',
                 call='draw_projection',
-                preserve_names=['v_color']
+                preserve_names=['v_color', *preserve_names]
             ),
             fragment=Snippet(
                 color_fragment
@@ -40,7 +41,7 @@ class ColorPerspective(Perspective):
                 }
                 ''',
                 call='apply_colors',
-                preserve_names=['v_color']
+                preserve_names=['v_color', *preserve_names]
             ),
             position=self.mesh.points,
             vertex_count=len(self.mesh.points),
@@ -72,7 +73,12 @@ class UniformColorPerspective(ColorPerspective):
             },
             *args, **kwargs
         )       
-        
+    
+    def draw(self, t):
+        self.program.draw(
+            gl.GL_TRIANGLES,
+            self.as_index_buffer(self.mesh.faces)
+        )
 
 
 class MultiColorPerspective(ColorPerspective):
@@ -120,18 +126,9 @@ class AnimatedColorPerspective(ColorPerspective):
                 float y = pos[1];
                 float z = pos[2];
                 return vec4(
-                    0.5*(1 + sin(
-        //                exp(5*cos(u_time)) * x * y / 7.0
-x*y*u_time/12
-                    )),
-                    0.5*(1 + cos(
-x*u_time/36
-//                        exp(3*sin(u_time)) * x / 11.0
-                    )),
-                    0.5*(1 + sin(
-y*u_time/24
- //                       exp(2*sin(u_time)) * y / 16.0
-                    )),
+                    0.5*(1 + sin(x*y*u_time/12)),
+                    0.5*(1 + cos(x*u_time/36)),
+                    0.5*(1 + sin(y*u_time/24)),
                     1.0
                 );
             }

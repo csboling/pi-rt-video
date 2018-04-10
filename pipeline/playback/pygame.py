@@ -23,11 +23,11 @@ class PygameSink(Sink):
         if isinstance(item, np.ndarray):
             frame = item.swapaxes(0, 1)
             surface = surfarray.make_surface(frame)
-        screen.blit(surface, (0, 0))
+        self.screen.blit(surface, (0, 0))
         pygame.display.flip()
     
 
     def initialize(self, res, flags=0):
         pygame.init()
-        screen = pygame.display.set_mode(res, flags) # | pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode(res, flags)
 

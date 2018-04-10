@@ -11,6 +11,7 @@ from pipeline.playback.pygame import PygameSink
 from pipeline.animation.Animation import NoAnimation
 from pipeline.animation import CircularMotion
 from pipeline.animation.parametric import (
+    Harmonograph,
     LissajousCurve,
     RoseCurve,
 )
@@ -39,6 +40,7 @@ from pipeline.synthesis.pattern import (
     UniformColorMap,
     WeirdSineColorMap,
 )
+from pipeline.synthesis.automata.cellular import GameOfLife
 
 
 class VideoSynthesisPipeline(Pipeline):
@@ -46,7 +48,7 @@ class VideoSynthesisPipeline(Pipeline):
 
     def __init__(self):
         source = VideoSynthesisSource(
-            framerate=24, fill=(100, 100, 100)
+            framerate=24, resolution=(320, 240), #, fill=(100, 100, 100)
         )
         w, h = source.resolution
         x, y = (
@@ -56,11 +58,22 @@ class VideoSynthesisPipeline(Pipeline):
 
         super().__init__([
             source,
-
             SurfarrayAdapter(),
-            Resample(1/self.downsampling),
-            AnimateMap(WeirdSineColorMap()),
-            Resample(self.downsampling),
+            GameOfLife(
+                init=np.array([
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+                    [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+                    [0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+                    [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ]),
+                hold=3,
+            ),
         ])
 
     def run(self):
