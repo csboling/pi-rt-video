@@ -2,7 +2,8 @@
 from pipeline.VideoSynthesisPipeline import VideoSynthesisPipeline
 # from pipeline.OpenGLPipeline import OpenGLPipeline
 
-# from pipeline.gallery.LissajousPlaid import LissajousPlaid
+from pipeline.gallery.vaporsphere import Vaporsphere
+from pipeline.gallery.LissajousPlaid import LissajousPlaid
 
 
 reload_on_save = False # True
@@ -13,9 +14,8 @@ if trace_leaks:
     from pympler.tracker import SummaryTracker
     tracker = SummaryTracker()
 
-p = VideoSynthesisPipeline()
+p = Vaporsphere(resolution=(640,480))
 # p = LissajousPlaid()
-# p = OpenGLPipeline()
 
 if reload_on_save:
     from werkzeug.serving import run_with_reloader

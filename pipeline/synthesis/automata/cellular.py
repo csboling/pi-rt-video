@@ -30,18 +30,19 @@ class CellularAutomaton(TimeProcessor):
             next_state[1:-1, 1:-1][rule(state, score)] = value
         return next_state
 
-    def __call__(self, item, t):
+    def __call__(self, t): #, item, t):
         if self.frame is None or self.counter == self.hold:
             self.counter = 0
             self.frame = self.next_frame()
         else:
             self.counter += 1
-        item[...] = self.frame
-        return item
+        return self.frame
+        # item[...] = self.frame
+        # return item
         
     def next_frame(self):
         w, h = self.state.shape
-        screen_w, screen_h = self.resolution
+        screen_w, screen_h = (100, 100) #self.resolution
         x_reps, y_reps= screen_w // w, screen_h // h
         
         colors = np.zeros((w, h, 3), np.uint8)

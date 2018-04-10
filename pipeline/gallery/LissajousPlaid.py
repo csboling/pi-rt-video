@@ -33,8 +33,8 @@ class LissajousPlaid(Pipeline):
 
             # Fill((0x8f, 0x8f, 0x8f, 0xff)),
             Pen(
-                animation=parametric.ButterflyCurve(
-                    X=30, Y=30,
+                animation=parametric.LissajousCurve( # parametric.ButterflyCurve(
+                    X=300, Y=300,
                     # X=250, Y=130,
                     a=np.pi,
                     b=13,
