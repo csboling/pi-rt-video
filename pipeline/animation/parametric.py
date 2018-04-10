@@ -28,7 +28,7 @@ class Parametric2DMotion(Animation):
     def get_xy(self, res, frame, t):
         w, h = res
         return (
-            w // 2 + self.x(2*np.pi*self.v(t)*t), 
+            w // 2 + self.x(2*np.pi*self.v(t)*t),
             h // 2 + self.y(2*np.pi*self.v(t)*t),
         )
 
@@ -36,8 +36,14 @@ class Parametric2DMotion(Animation):
 class Harmonograph(Parametric2DMotion):
     def __init__(self, x_terms, y_terms, *args, **kwargs):
         super().__init__(
-            lambda t: sum(self.term(np.cos, **params, t=t) for params in x_terms),
-            lambda t: sum(self.term(np.sin, **params, t=t) for params in y_terms),
+            lambda t: sum(
+                self.term(np.cos, **params, t=t)
+                for params in x_terms
+            ),
+            lambda t: sum(
+                self.term(np.sin, **params, t=t)
+                for params in y_terms
+            ),
             *args, **kwargs
         )
 
@@ -51,15 +57,15 @@ class Hypocycloid(Parametric2DMotion):
     def __init__(self, X, Y, a, b, *args, **kwargs):
         super().__init__(
             lambda t: X(t) * (
-                (a(t) + b(t))*np.cos(t) 
-                + 
+                (a(t) + b(t))*np.cos(t)
+                +
                 b(t)*np.cos(
                     (a(t) + b(t)) / b(t) * t
                 )
             ),
             lambda t: Y(t) * (
-                (a(t) + b(t))*np.sin(t) 
-                + 
+                (a(t) + b(t))*np.sin(t)
+                +
                 b(t)*np.sin(
                     (a(t) + b(t)) / b(t) * t
                 )
@@ -69,9 +75,9 @@ class Hypocycloid(Parametric2DMotion):
 
 
 class LissajousCurve(Parametric2DMotion):
-    
+
     @params(X=None, Y=None, a=1, b=1, delta=np.pi/2)
-    def __init__(self, X, Y, a, b, delta, *args, **kwargs): 
+    def __init__(self, X, Y, a, b, delta, *args, **kwargs):
         super().__init__(
             lambda t: X(t) * np.sin(a(t)*t / 4 + delta(t)),
             lambda t: Y(t) * np.sin(b(t)*t / 4),
@@ -91,11 +97,11 @@ class Nephroid(Parametric2DMotion):
 
 
 class RoseCurve(Parametric2DMotion):
-    
+
     @params(X=None, Y=None, k=1)
     def __init__(self, X, Y, k, *args, **kwargs):
         super().__init__(
-            lambda t: X(t) * np.cos(k(t)*t) * np.cos(t),  
+            lambda t: X(t) * np.cos(k(t)*t) * np.cos(t),
             lambda t: Y(t) * np.cos(k(t)*t) * np.sin(t),
             *args, **kwargs
         )

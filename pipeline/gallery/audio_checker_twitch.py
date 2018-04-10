@@ -1,8 +1,9 @@
 from glumpy import glm
 import numpy as np
 
+from pipeline.audio.capture import AudioSync
 from pipeline.Pipeline import Pipeline
-from pipeline.sprite.mesh import IcosphereMesh
+from pipeline.sprite.mesh import BoxMesh
 from pipeline.synthesis.opengl.prelude import (
     Clear,
     Rotation,
@@ -13,7 +14,7 @@ from pipeline.synthesis.source import VideoSynthesisSource
 from pipeline.playback.opengl import OpenGLPygameSink
 
 
-class Vaporsphere(Pipeline):
+class AudioCheckerTwitch(Pipeline):
 
     def __init__(self, framerate=24, resolution=None):
         source = VideoSynthesisSource(
@@ -27,10 +28,22 @@ class Vaporsphere(Pipeline):
 
             Clear(color=(0.7, 0.7, 0.7, 1)),
             TexturePerspective(
-                mesh=IcosphereMesh(ref_steps=2),
-                color=(0, 1, 1, 0),
+                mesh=BoxMesh(),
+                color=[
+                    (0, 0, 0, 1),
+                    (0, 0, 1, 1),
+                    (0, 1, 0, 1),
+                    (0, 1, 1, 1),
+
+                    (1, 0, 0, 1),
+                    (1, 0, 1, 1),
+                    (1, 1, 0, 1),
+                    (1, 1, 1, 1),
+                ]*3,
+                texture=Checkerboard(
+                    offset=AudioSync()
+                ),
                 projection=glm.perspective(45., w / h, 2., 100.),
-                texture=Checkerboard(),
                 model=Rotation(
                     angle=lambda t: (20*t, 20*t, 20*t),
                     matrix=lambda t: np.eye(4)

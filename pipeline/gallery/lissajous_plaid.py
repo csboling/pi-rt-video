@@ -6,10 +6,8 @@ from pipeline.playback.pygame import PygameSink
 
 from pipeline.animation import parametric
 
-from pipeline.processor.geometry import Rotate
 from pipeline.synthesis.adapters import SurfarrayAdapter
 from pipeline.synthesis.draw import (
-    Fill,
     Pen,
     ROYGBIV,
 )
@@ -18,29 +16,26 @@ from pipeline.synthesis.draw import (
 class LissajousPlaid(Pipeline):
     downsampling = 4
 
-    def __init__(self):
+    def __init__(self, resolution=None):
         source = VideoSynthesisSource(
-            framerate=60, fill=(100, 100, 100)
+            framerate=60,
+            fill=(100, 100, 100),
+            resolution=resolution
         )
         w, h = source.resolution
-        x, y = (
-            np.arange(-w//2, w//2)*4*2*np.pi/w, 
-            np.arange(-h//2, h//2)*4*2*np.pi/h,
-        )
 
         super().__init__([
             source,
 
             # Fill((0x8f, 0x8f, 0x8f, 0xff)),
             Pen(
-                animation=parametric.LissajousCurve( # parametric.ButterflyCurve(
-                    X=300, Y=300,
-                    # X=250, Y=130,
+                animation=parametric.LissajousCurve(
+                    X=0.5*w, Y=0.5*h,
                     a=np.pi,
                     b=13,
                 ),
                 colors=ROYGBIV,
-            ),            
+            ),
             SurfarrayAdapter(),
         ])
 

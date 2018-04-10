@@ -8,7 +8,7 @@ from pipeline.utils import params
 
 class TexturePerspective(ColorPerspective):
     @params(texture=None)
-    def __init__(self, mesh, texture, color=(0, 0, 0, 0), *args, **kwargs):
+    def __init__(self, mesh, texture, color, *args, **kwargs):
         self.mesh = mesh
         super().__init__(
             mesh=mesh,
@@ -29,9 +29,8 @@ class TexturePerspective(ColorPerspective):
 
             vec4 color_fragment(vec4 vertex_color)
             {
-                return texture2D(u_texture, v_texcoord).rgba;
-                // vec4 t_color = vec4(vec3(texture2D(u_texture, v_texcoord).r), 1.0);
-                // return t_color * mix(vertex_color, t_color, 0.25);
+                vec4 t_color = vec4(vec3(texture2D(u_texture, v_texcoord).r), 1.0);
+                return t_color * mix(vertex_color, t_color, 0.25);
             }
             ''',
             preserve_names=['v_texcoord'],

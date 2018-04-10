@@ -80,19 +80,23 @@ class AnimateMap(Processor):
             t += 1 / self.framerate
 
 
-class Checkerboard:
-    def checks(self, grid_num=8, grid_size=32):
+class Checkerboard:   
+    @params(offset=lambda t: (
+        int(128 + 127*np.cos(2*np.pi*t / 8)),
+        int(128 + 127*np.sin(3*np.pi*t / 8)),
+    ))
+    def __init__(self, offset):
+        self.offset = offset
+
+    def checks(self, offset, grid_num=8, grid_size=32):
         row_even = grid_num // 2 * [0, 1]
         row_odd = grid_num // 2 * [1, 0]
         Z = np.row_stack(grid_num // 2 * (row_even, row_odd)).astype(np.uint8)
         return 255 * Z.repeat(grid_size, axis=0).repeat(grid_size, axis=1)
         
     def __call__(self, t):
-        checks = self.checks()
-        offset = (
-            int(128 + 127*np.cos(2*np.pi*t / 8)),
-            int(128 + 127*np.sin(3*np.pi*t / 8)),
-        )
+        offset = self.offset(t)
+        checks = self.checks(offset)
         return np.roll(checks, offset)
 
 

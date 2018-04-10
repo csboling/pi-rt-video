@@ -1,18 +1,14 @@
-from abc import ABCMeta, abstractmethod
-import itertools
-
 import meshzoo
 import numpy as np
-import pygmsh
 
 
-class Mesh(metaclass=ABCMeta):
+class Mesh:
 
     def __init__(self, points=None, faces=None, texcoord=None):
         self._points = points
         self._faces = faces
         self._texcoord = texcoord
-    
+
     @property
     def points(self):
         if self._points is not None:
@@ -26,7 +22,7 @@ class Mesh(metaclass=ABCMeta):
             return self._faces
         else:
             raise NotImplementedError
-        
+
     @property
     def texcoord(self):
         if self._texcoord is not None:

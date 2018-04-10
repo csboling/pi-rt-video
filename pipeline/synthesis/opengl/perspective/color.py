@@ -73,7 +73,12 @@ class UniformColorPerspective(ColorPerspective):
             },
             *args, **kwargs
         )       
-        
+    
+    def draw(self, t):
+        self.program.draw(
+            gl.GL_TRIANGLES,
+            self.as_index_buffer(self.mesh.faces)
+        )
 
 
 class MultiColorPerspective(ColorPerspective):
