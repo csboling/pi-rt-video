@@ -3,7 +3,6 @@ import itertools
 
 import meshzoo
 import numpy as np
-import pygmsh
 
 
 class Mesh(metaclass=ABCMeta):

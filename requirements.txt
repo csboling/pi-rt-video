@@ -1,0 +1,8 @@
+Cython==0.28.1
+glumpy==1.0.6
+meshzoo==0.3.2
+numpy==1.14.2+mkl
+opencv-python==3.4.0.12
+pygame==1.9.3
+PyOpenGL==3.1.2
+Werkzeug==0.14.1
