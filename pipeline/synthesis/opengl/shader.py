@@ -1,7 +1,7 @@
 from abc import abstractmethod
 import re
 
-from glumpy import gl, gloo
+from glumpy import gloo
 import numpy as np
 
 from pipeline.synthesis.opengl.prelude import OpenGLProcessor
@@ -21,8 +21,14 @@ class Snippet(gloo.Snippet):
         code = self._source_code
         objects = self._objects
         functions = objects["functions"]
-        names = objects["uniforms"] + objects["attributes"] + objects["varyings"]
-        for _,name,_,_ in functions:
+        names = (
+            objects["uniforms"]
+            +
+            objects["attributes"]
+            +
+            objects["varyings"]
+        )
+        for _, name, _, _ in functions:
             symbol = self.symbols[name]
             code = re.sub(r"(?<=[^\w])(%s)(?=\()" % name, symbol, code)
         for name, _ in names:
@@ -48,7 +54,7 @@ class SnippetProgram(gloo.Program):
         print('==================================')
         fragment_code = self.finalize_snippet(self.fragment_snippet)
         self.list_shader('fragment:', fragment_code)
-        
+
         super().__init__(
             vertex=vertex_code,
             fragment=fragment_code,
@@ -60,7 +66,7 @@ class SnippetProgram(gloo.Program):
         print(name)
         for line in code.split('\n'):
             print(line.lstrip())
-            
+
     @staticmethod
     def finalize_snippet(snippet):
         return snippet.code + '''
@@ -81,14 +87,14 @@ class SnippetProgram(gloo.Program):
                 return snippet.symbols[key]
             except KeyError:
                 continue
-        raise KeyError
-        
+        raise KeyError(key)
+
     def __getitem__(self, key):
         return super().__getitem__(self.mangle_key(key))
-        
+
     def __setitem__(self, key, item):
         return super().__setitem__(self.mangle_key(key), item)
-            
+
 
 class Shader(OpenGLProcessor):
     def __init__(self,
@@ -99,7 +105,7 @@ class Shader(OpenGLProcessor):
             vertex=vertex, fragment=fragment,
             *args, **kwargs
         )
-        
+
         self.uniforms = {
             name: process_param(param)
             for name, param in uniforms.items()
@@ -117,7 +123,7 @@ class Shader(OpenGLProcessor):
         self.vertex_buffers = np.zeros(
             self.vertex_count, attr_shapes
         ).view(gloo.VertexBuffer)
-        
+
     def __call__(self, surface, t):
         self.load_buffers(t)
         self.gl_setup(t)
@@ -140,7 +146,7 @@ class Shader(OpenGLProcessor):
 
     def gl_teardown(self, t):
         pass
-            
+
     @abstractmethod
     def draw(self, t):
         pass
@@ -148,7 +154,7 @@ class Shader(OpenGLProcessor):
     @staticmethod
     def as_vertex_buffer(points, depth):
         return np.array(points, dtype=np.float32).reshape((-1, depth))
-    
+
     @staticmethod
     def as_index_buffer(points):
         return np.array(points, dtype=np.uint32).view(gloo.IndexBuffer)

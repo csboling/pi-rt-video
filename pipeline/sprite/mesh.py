@@ -106,3 +106,7 @@ class IcosphereMesh(Mesh):
             0.5 + d[:, 1]*0.5,
             0.5 + np.arctan2(d[:, 0], d[:, 2]) / (2*np.pi),
         ), axis=-1)
+
+    @property
+    def normals(self):
+        return (-self.points.T / np.linalg.norm(self.points, axis=-1)).T

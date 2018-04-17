@@ -9,11 +9,18 @@ class ColorPerspective(Perspective):
     def __init__(self,
                  mesh,
                  color_vertex, color_fragment,
+                 process_vertex=None,
                  preserve_names=tuple(),
                  *args, **kwargs):
         self.mesh = mesh
 
         super().__init__(
+            process_vertex=process_vertex or '''
+            vec3 process_vertex(vec3 pos, vec3 normal)
+            {
+                return pos;
+            }
+            ''',
             vertex=Snippet(
                 color_vertex
                 +
@@ -44,6 +51,7 @@ class ColorPerspective(Perspective):
                 preserve_names=['v_color', *preserve_names]
             ),
             position=self.mesh.points,
+            normal=self.mesh.normals,
             vertex_count=len(self.mesh.points),
             *args, **kwargs
         )

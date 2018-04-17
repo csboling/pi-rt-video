@@ -8,14 +8,13 @@ from pipeline.utils import params
 
 class Perspective(Shader):
     @params(
-        position=None,
         model=np.eye(4, dtype=np.float32),
         view=translation_matrix((0, 0, -5)),
         projection=np.eye(4, dtype=np.float32),
     )
     def __init__(self,
-                 vertex, fragment,
-                 position,
+                 process_vertex, vertex, fragment,
+                 position, normal,
                  model, view, projection,
                  uniforms=None, attributes=None,
                  *args, **kwargs):
@@ -23,29 +22,35 @@ class Perspective(Shader):
             uniforms = dict()
         if attributes is None:
             attributes = dict()
-        
+
         project = Snippet(
+            process_vertex +
             '''
             uniform mat4 u_model;
             uniform mat4 u_view;
             uniform mat4 u_projection;
             attribute vec3 a_position;
+            attribute vec3 a_normal;
 
             vec4 project()
             {
                 return u_projection *
                        u_view *
                        u_model *
-                       vec4(a_position, 1.0);
+                       vec4(
+                           process_vertex(a_position, a_normal),
+                           1.0
+                       );
             }
             ''',
-            default='project'
+            call='project'
         )
         projected = vertex(project())
         super().__init__(
             vertex=projected, fragment=fragment,
             attributes={
                 'a_position': (3, position),
+                'a_normal': (3, normal),
                 **attributes,
             },
             uniforms={
