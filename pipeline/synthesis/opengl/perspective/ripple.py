@@ -38,9 +38,13 @@ class RipplePerspective(ColorPerspective):
             color_fragment='''
             varying vec3 v_normal;
 
-            vec4 color_fragment(vec4 vertex_color)
+            vec4 color_fragment(vec3 position, vec4 vertex_color)
             {
-                return vec4(v_normal, 1.0);
+                vec3 surfaceToLight = vec3(2.0, -2.0, 0.0) - position;
+                float brightness = dot(v_normal, surfaceToLight) /
+                      (length(surfaceToLight) * length(v_normal));
+                brightness = max(min(brightness, 1.0), 0.0);
+            return vec4(v_normal, 1.0) * (0.1 + 0.9 * brightness);
             }
             ''',
             uniforms={

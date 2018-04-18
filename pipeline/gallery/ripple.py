@@ -2,7 +2,7 @@ from glumpy import glm
 import numpy as np
 
 from pipeline.Pipeline import Pipeline
-from pipeline.sprite.mesh import IcosphereMesh
+from pipeline.sprite.mesh import IcosphereMesh, MoebiusMesh
 from pipeline.synthesis.opengl.prelude import Clear, Rotation
 from pipeline.synthesis.opengl.perspective.ripple import (
     RipplePerspective
@@ -24,7 +24,7 @@ class Ripple(Pipeline):
 
             Clear(color=(0, 0, 0, 1)),
             RipplePerspective(
-                mesh=IcosphereMesh(ref_steps=3),
+                mesh=IcosphereMesh(ref_steps=5),
                 projection=glm.perspective(45., w / h, 2., 100.),
                 model=Rotation(
                     angle=lambda t: (5*t, 5*t, 5*t),

@@ -26,29 +26,32 @@ class ColorPerspective(Perspective):
                 +
                 '''
                 varying vec4 v_color;
+                varying vec3 v_position;
 
                 void draw_projection(in vec4 pos)
                 {
                     gl_Position = pos;
+                    v_position = pos.xyz;
                     v_color = color_vertex(pos);
                 }
                 ''',
                 call='draw_projection',
-                preserve_names=['v_color', *preserve_names]
+                preserve_names=['v_color', 'v_position', *preserve_names]
             ),
             fragment=Snippet(
                 color_fragment
                 +
                 '''
+                varying vec3 v_position;
                 varying vec4 v_color;
 
                 void apply_colors()
                 {
-                    gl_FragColor = color_fragment(v_color);
+                    gl_FragColor = color_fragment(v_position, v_color);
                 }
                 ''',
                 call='apply_colors',
-                preserve_names=['v_color', *preserve_names]
+                preserve_names=['v_color', 'v_position', *preserve_names]
             ),
             preserve_names=preserve_names,
             position=self.mesh.points,

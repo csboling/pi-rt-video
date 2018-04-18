@@ -90,6 +90,9 @@ class MoebiusMesh(Mesh):
     def __init__(self, *args, **kwargs):
         self._points, self._faces = meshzoo.moebius(*args, **kwargs)
 
+    @property
+    def normals(self):
+        return (-self.points.T / np.linalg.norm(self.points, axis=-1)).T
 
 class IcosphereMesh(Mesh):
     def __init__(self, *args, **kwargs):
