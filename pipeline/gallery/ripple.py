@@ -24,10 +24,10 @@ class Ripple(Pipeline):
 
             Clear(color=(0, 0, 0, 1)),
             RipplePerspective(
-                mesh=IcosphereMesh(ref_steps=2),
+                mesh=IcosphereMesh(ref_steps=3),
                 projection=glm.perspective(45., w / h, 2., 100.),
                 model=Rotation(
-                    angle=lambda t: (20*t, 20*t, 20*t),
+                    angle=lambda t: (5*t, 5*t, 5*t),
                     matrix=lambda t: np.eye(4)
                 )
             )

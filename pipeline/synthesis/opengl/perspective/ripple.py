@@ -10,6 +10,9 @@ class RipplePerspective(ColorPerspective):
         super().__init__(
             mesh=mesh,
             color_vertex='''
+            #extension GL_OES_standard_derivatives : enable
+            precision highp float;
+
             uniform vec4 u_color;
 
             vec4 color_vertex(vec4 pos)
@@ -22,24 +25,29 @@ class RipplePerspective(ColorPerspective):
             const float amplitude = 0.125;
             const float frequency = 4;
             const float PI = 3.14159;
+            varying vec3 v_normal;
 
             vec3 process_vertex(vec3 pos, vec3 normal)
             {
-                float distance = length(pos);
+                v_normal = normal;
+                float distance = pos.x * pos.y * pos.z;
                 float deformation = amplitude*sin(-PI*distance*frequency + u_time);
                 return pos + deformation * normal;
             }
             ''',
             color_fragment='''
+            varying vec3 v_normal;
+
             vec4 color_fragment(vec4 vertex_color)
             {
-                return vertex_color;
+                return vec4(v_normal, 1.0);
             }
             ''',
             uniforms={
                 'u_color': color,
                 'u_time': lambda t: t,
             },
+            preserve_names=['v_normal'],
             *args, **kwargs
         )
 

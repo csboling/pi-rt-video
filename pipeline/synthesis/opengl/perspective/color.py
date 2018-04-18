@@ -50,6 +50,7 @@ class ColorPerspective(Perspective):
                 call='apply_colors',
                 preserve_names=['v_color', *preserve_names]
             ),
+            preserve_names=preserve_names,
             position=self.mesh.points,
             normal=self.mesh.normals,
             vertex_count=len(self.mesh.points),

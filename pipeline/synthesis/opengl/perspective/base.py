@@ -16,6 +16,7 @@ class Perspective(Shader):
                  process_vertex, vertex, fragment,
                  position, normal,
                  model, view, projection,
+                 preserve_names=tuple(),
                  uniforms=None, attributes=None,
                  *args, **kwargs):
         if uniforms is None:
@@ -43,7 +44,8 @@ class Perspective(Shader):
                        );
             }
             ''',
-            call='project'
+            call='project',
+            preserve_names=preserve_names
         )
         projected = vertex(project())
         super().__init__(
